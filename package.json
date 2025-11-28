@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/usnistgov/OpenSeadragonFiltering#readme",
   "dependencies": {
-    "openseadragon": ">=2.4.2"
+    "openseadragon": ">=5.0.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.0",
