@@ -1,6 +1,5 @@
 import * as Shaders from './webgl-shaders';
-import { createShaderProgram } from './webgl-utils';
-import { configureTexture } from './webgl-utils';
+import { createShaderProgram, configureTexture } from './webgl-utils';
 
 interface ShaderProgram {
     program: WebGLProgram;
@@ -100,6 +99,31 @@ class WebGLFilterProcessor {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
+    private setUniform(program: WebGLProgram, name: string, value: any): void {
+        const gl = this.gl;
+        const location = gl.getUniformLocation(program, name);
+        if (!location) return;
+
+        if (typeof value === 'number') {
+            if (name === 'u_kernelSize') {
+                gl.uniform1i(location, value);
+            } else {
+                gl.uniform1f(location, value);
+            }
+        } else if (Array.isArray(value)) {
+            if (value.length === 2) gl.uniform2fv(location, value);
+            else if (value.length === 3) gl.uniform3fv(location, value);
+            else if (value.length === 9) gl.uniform1fv(location, value);
+            else gl.uniform1fv(location, value);
+        }
+    }
+
+    private setupUniforms(program: WebGLProgram, uniforms: Record<string, any>): void {
+        for (const [name, value] of Object.entries(uniforms)) {
+            this.setUniform(program, name, value);
+        }
+    }
+
     applyFilter(context: CanvasRenderingContext2D, filterName: string, fragmentShader: string, uniforms: Record<string, any>, callback?: () => void): void {
         const gl = this.gl;
         const sourceCanvas = context.canvas;
@@ -112,20 +136,7 @@ class WebGLFilterProcessor {
         gl.useProgram(program.program);
 
         this.setupTexture(sourceCanvas);
-
-        for (const [name, value] of Object.entries(uniforms)) {
-            const location = gl.getUniformLocation(program.program, name);
-            if (location) {
-                if (typeof value === 'number') {
-                    gl.uniform1f(location, value);
-                } else if (Array.isArray(value)) {
-                    if (value.length === 2) gl.uniform2fv(location, value);
-                    else if (value.length === 3) gl.uniform3fv(location, value);
-                    else if (value.length === 9) gl.uniform1fv(location, value);
-                    else gl.uniform1fv(location, value);
-                }
-            }
-        }
+        this.setupUniforms(program.program, uniforms);
 
         const imageLocation = gl.getUniformLocation(program.program, 'u_image');
         gl.uniform1i(imageLocation, 0);

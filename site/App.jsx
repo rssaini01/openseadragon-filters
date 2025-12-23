@@ -81,6 +81,8 @@ export default function App() {
         if (name === 'greyscale') return convertToWebGLFilter('greyscale', Shaders.greyscaleShader, {});
         if (name === 'invert') return convertToWebGLFilter('invert', Shaders.invertShader, {});
         if (name === 'thresholding') return convertToWebGLFilter('threshold', Shaders.thresholdShader, { u_threshold: value });
+        if (name === 'dilation') return convertToWebGLFilter('dilation', Shaders.dilationShader, { u_kernelSize: value, u_textureSize: [2048, 2048] });
+        if (name === 'erosion') return convertToWebGLFilter('erosion', Shaders.erosionShader, { u_kernelSize: value, u_textureSize: [2048, 2048] });
         return null;
     };
 

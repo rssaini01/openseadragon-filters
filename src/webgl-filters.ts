@@ -58,3 +58,27 @@ export const COLORMAP_WEBGL = (stops: number[][], centerpoint: number = 128): Fi
         u_centerpoint: centerpoint
     });
 };
+
+export const DILATION_WEBGL = (kernelSize: number): FilterProcessor => {
+    if (kernelSize % 2 === 0 || kernelSize < 3) {
+        throw new Error('Kernel size must be an odd number >= 3.');
+    }
+    return (context: CanvasRenderingContext2D, callback?: () => void) => {
+        createWebGLFilter('dilation', Shaders.dilationShader, {
+            u_kernelSize: kernelSize,
+            u_textureSize: [context.canvas.width, context.canvas.height]
+        })(context, callback);
+    };
+};
+
+export const EROSION_WEBGL = (kernelSize: number): FilterProcessor => {
+    if (kernelSize % 2 === 0 || kernelSize < 3) {
+        throw new Error('Kernel size must be an odd number >= 3.');
+    }
+    return (context: CanvasRenderingContext2D, callback?: () => void) => {
+        createWebGLFilter('erosion', Shaders.erosionShader, {
+            u_kernelSize: kernelSize,
+            u_textureSize: [context.canvas.width, context.canvas.height]
+        })(context, callback);
+    };
+};

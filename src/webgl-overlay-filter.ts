@@ -110,8 +110,13 @@ class WebGLFilterRenderer {
         for (const [name, value] of Object.entries(uniforms)) {
             const loc = gl.getUniformLocation(program, name);
             if (!loc) continue;
-            if (typeof value === 'number') gl.uniform1f(loc, value);
-            else if (Array.isArray(value)) {
+            if (typeof value === 'number') {
+                if (name === 'u_kernelSize') {
+                    gl.uniform1i(loc, value);
+                } else {
+                    gl.uniform1f(loc, value);
+                }
+            } else if (Array.isArray(value)) {
                 if (value.length === 2) gl.uniform2fv(loc, value);
                 else if (value.length === 3) gl.uniform3fv(loc, value);
                 else gl.uniform1fv(loc, value);

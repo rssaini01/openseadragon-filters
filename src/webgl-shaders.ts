@@ -118,3 +118,45 @@ void main() {
   gl_FragColor = vec4(mappedColor, color.a);
 }
 `;
+
+export const dilationShader = `
+precision mediump float;
+uniform sampler2D u_image;
+uniform vec2 u_textureSize;
+uniform int u_kernelSize;
+varying vec2 v_texCoord;
+void main() {
+  vec2 onePixel = vec2(1.0) / u_textureSize;
+  float halfSize = float(u_kernelSize / 2);
+  vec4 maxColor = vec4(0.0);
+  for (int y = -25; y <= 25; y++) {
+    for (int x = -25; x <= 25; x++) {
+      if (abs(float(y)) > halfSize || abs(float(x)) > halfSize) continue;
+      vec4 sample = texture2D(u_image, v_texCoord + onePixel * vec2(float(x), float(y)));
+      maxColor = max(maxColor, sample);
+    }
+  }
+  gl_FragColor = maxColor;
+}
+`;
+
+export const erosionShader = `
+precision mediump float;
+uniform sampler2D u_image;
+uniform vec2 u_textureSize;
+uniform int u_kernelSize;
+varying vec2 v_texCoord;
+void main() {
+  vec2 onePixel = vec2(1.0) / u_textureSize;
+  float halfSize = float(u_kernelSize / 2);
+  vec4 minColor = vec4(1.0);
+  for (int y = -25; y <= 25; y++) {
+    for (int x = -25; x <= 25; x++) {
+      if (abs(float(y)) > halfSize || abs(float(x)) > halfSize) continue;
+      vec4 sample = texture2D(u_image, v_texCoord + onePixel * vec2(float(x), float(y)));
+      minColor = min(minColor, sample);
+    }
+  }
+  gl_FragColor = minColor;
+}
+`;

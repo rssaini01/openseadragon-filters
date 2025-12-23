@@ -82,7 +82,7 @@ export const availableFilters = [
             step: 2,
             onChange
         }),
-        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.max)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.DILATION_WEBGL(value || 3) : Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.max)
     },
     {
         name: 'Erosion',
@@ -96,6 +96,6 @@ export const availableFilters = [
             step: 2,
             onChange
         }),
-        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.min)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.EROSION_WEBGL(value || 3) : Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.min)
     }
 ].sort((a, b) => a.name.localeCompare(b.name));
