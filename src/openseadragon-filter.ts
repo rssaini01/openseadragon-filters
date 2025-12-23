@@ -188,41 +188,63 @@ export class FilterPlugin {
 
 function setOptions(instance: FilterPlugin, options?: FilterOptions): void {
     options = options || {};
-    instance.filters = options.filters ? (Array.isArray(options.filters) ? options.filters : [options.filters]) : [];
-
-    for (const filter of instance.filters) {
-        if (!filter.processors) {
-            throw new Error('Filter processors must be specified.');
-        }
-        filter.processors = Array.isArray(filter.processors) ? filter.processors : [filter.processors];
-    }
+    instance.filters = normalizeFilters(options.filters);
+    validateAndNormalizeProcessors(instance.filters);
     instance.filterIncrement++;
 
     if (options.loadMode === 'sync') {
         instance.viewer.forceRedraw();
     } else {
-        let itemsToReset: OpenSeadragonTiledImage[] = [];
-        for (const filter of instance.filters) {
-            if (!filter.items) {
-                itemsToReset = getAllItems(instance.viewer.world);
-                break;
-            }
-            if (Array.isArray(filter.items)) {
-                for (const item of filter.items) {
-                    addItemToReset(item, itemsToReset);
-                }
-            } else {
-                addItemToReset(filter.items, itemsToReset);
-            }
+        resetFilteredItems(instance);
+    }
+}
+
+function normalizeFilters(filters?: Filter | Filter[]): Filter[] {
+    if (!filters) return [];
+    return Array.isArray(filters) ? filters : [filters];
+}
+
+function validateAndNormalizeProcessors(filters: Filter[]): void {
+    for (const filter of filters) {
+        if (!filter.processors) {
+            throw new Error('Filter processors must be specified.');
         }
-        for (const item of itemsToReset) {
-            item.reset();
+        filter.processors = Array.isArray(filter.processors) ? filter.processors : [filter.processors];
+    }
+}
+
+function resetFilteredItems(instance: FilterPlugin): void {
+    const itemsToReset = collectItemsToReset(instance.filters, instance.viewer.world);
+    for (const item of itemsToReset) {
+        item.reset();
+    }
+}
+
+function collectItemsToReset(filters: Filter[], world: OpenSeadragonWorld): OpenSeadragonTiledImage[] {
+    const itemsToReset: OpenSeadragonTiledImage[] = [];
+
+    for (const filter of filters) {
+        if (!filter.items) {
+            return getAllItems(world);
         }
+        addFilterItemsToReset(filter.items, itemsToReset);
+    }
+
+    return itemsToReset;
+}
+
+function addFilterItemsToReset(items: OpenSeadragonTiledImage | OpenSeadragonTiledImage[], itemsToReset: OpenSeadragonTiledImage[]): void {
+    if (Array.isArray(items)) {
+        for (const item of items) {
+            addItemToReset(item, itemsToReset);
+        }
+    } else {
+        addItemToReset(items, itemsToReset);
     }
 }
 
 function addItemToReset(item: OpenSeadragonTiledImage, itemsToReset: OpenSeadragonTiledImage[]): void {
-    if (itemsToReset.indexOf(item) >= 0) {
+    if (itemsToReset.includes(item)) {
         throw new Error('An item can not be used by multiple filters.');
     }
     itemsToReset.push(item);
@@ -244,7 +266,7 @@ function getFiltersProcessors(instance: FilterPlugin, item: OpenSeadragonTiledIm
         if (!filter.items) {
             globalProcessors.push(...(filter.processors as FilterProcessor[]));
         } else if (Array.isArray(filter.items)) {
-            if (filter.items.indexOf(item) >= 0) {
+            if (filter.items.includes(item)) {
                 return filter.processors as FilterProcessor[];
             }
         } else if (filter.items === item) {

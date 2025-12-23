@@ -31,6 +31,7 @@ export default function App() {
             selectedListRef.current.sortable = Sortable.create(selectedListRef.current, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                handle: '.drag-handle',
                 onEnd: () => {
                     const items = Array.from(selectedListRef.current.children).map(div =>
                         filtersRef.current.find(f => f.id === div.dataset.id)

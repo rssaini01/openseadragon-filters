@@ -70,6 +70,15 @@ export const INVERT = (): FilterProcessor => {
     return (context, callback) => applyLookupTable(context, precomputed, callback);
 };
 
+interface MorphologicalContext {
+    originalPixels: Uint8ClampedArray;
+    pixels: Uint8ClampedArray;
+    width: number;
+    height: number;
+    kernelHalfSize: number;
+    comparator: (a: number, b: number) => number;
+}
+
 export const MORPHOLOGICAL_OPERATION = (kernelSize: number, comparator: (a: number, b: number) => number): FilterProcessor => {
     if (kernelSize % 2 === 0) {
         throw new Error('The kernel size must be an odd number.');
@@ -77,34 +86,52 @@ export const MORPHOLOGICAL_OPERATION = (kernelSize: number, comparator: (a: numb
     const kernelHalfSize = Math.floor(kernelSize / 2);
     return (context, callback) => {
         const imgData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-        const originalPixels = new Uint8ClampedArray(imgData.data);
-        const pixels = imgData.data;
-        const width = imgData.width;
-        const height = imgData.height;
+        const morphContext: MorphologicalContext = {
+            originalPixels: new Uint8ClampedArray(imgData.data),
+            pixels: imgData.data,
+            width: imgData.width,
+            height: imgData.height,
+            kernelHalfSize,
+            comparator
+        };
 
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const i = (y * width + x) * 4;
-                for (let c = 0; c < 3; c++) {
-                    let value = originalPixels[i + c];
-                    for (let ky = -kernelHalfSize; ky <= kernelHalfSize; ky++) {
-                        for (let kx = -kernelHalfSize; kx <= kernelHalfSize; kx++) {
-                            const pixelY = y + ky;
-                            const pixelX = x + kx;
-                            if (pixelY >= 0 && pixelY < height && pixelX >= 0 && pixelX < width) {
-                                const pixelIndex = (pixelY * width + pixelX) * 4;
-                                value = comparator(value, originalPixels[pixelIndex + c]);
-                            }
-                        }
-                    }
-                    pixels[i + c] = value;
-                }
+        for (let y = 0; y < morphContext.height; y++) {
+            for (let x = 0; x < morphContext.width; x++) {
+                const i = (y * morphContext.width + x) * 4;
+                applyMorphologicalOperation(morphContext, i, x, y);
             }
         }
         context.putImageData(imgData, 0, 0);
         callback?.();
     };
 };
+
+function applyMorphologicalOperation(ctx: MorphologicalContext, pixelIndex: number, x: number, y: number): void {
+    for (let c = 0; c < 3; c++) {
+        let value = ctx.originalPixels[pixelIndex + c];
+        for (let ky = -ctx.kernelHalfSize; ky <= ctx.kernelHalfSize; ky++) {
+            for (let kx = -ctx.kernelHalfSize; kx <= ctx.kernelHalfSize; kx++) {
+                const pixelY = y + ky;
+                const pixelX = x + kx;
+                if (isPixelInBounds(pixelX, pixelY, ctx.width, ctx.height)) {
+                    const neighborIndex = (pixelY * ctx.width + pixelX) * 4;
+                    value = ctx.comparator(value, ctx.originalPixels[neighborIndex + c]);
+                }
+            }
+        }
+        ctx.pixels[pixelIndex + c] = value;
+    }
+}
+
+interface ConvolutionContext {
+    originalPixels: Uint8ClampedArray;
+    pixels: Uint8ClampedArray;
+    width: number;
+    height: number;
+    kernel: number[];
+    kernelSize: number;
+    kernelHalfSize: number;
+}
 
 export const CONVOLUTION = (kernel: number[]): FilterProcessor => {
     const kernelSize = Math.sqrt(kernel.length);
@@ -114,35 +141,52 @@ export const CONVOLUTION = (kernel: number[]): FilterProcessor => {
     const kernelHalfSize = Math.floor(kernelSize / 2);
     return (context, callback) => {
         const imgData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-        const originalPixels = new Uint8ClampedArray(imgData.data);
-        const pixels = imgData.data;
-        const width = imgData.width;
-        const height = imgData.height;
+        const convContext: ConvolutionContext = {
+            originalPixels: new Uint8ClampedArray(imgData.data),
+            pixels: imgData.data,
+            width: imgData.width,
+            height: imgData.height,
+            kernel,
+            kernelSize,
+            kernelHalfSize
+        };
 
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const i = (y * width + x) * 4;
-                for (let c = 0; c < 3; c++) {
-                    let value = 0;
-                    for (let ky = -kernelHalfSize; ky <= kernelHalfSize; ky++) {
-                        for (let kx = -kernelHalfSize; kx <= kernelHalfSize; kx++) {
-                            const pixelY = y + ky;
-                            const pixelX = x + kx;
-                            if (pixelY >= 0 && pixelY < height && pixelX >= 0 && pixelX < width) {
-                                const pixelIndex = (pixelY * width + pixelX) * 4;
-                                const kernelIndex = (ky + kernelHalfSize) * kernelSize + (kx + kernelHalfSize);
-                                value += originalPixels[pixelIndex + c] * kernel[kernelIndex];
-                            }
-                        }
-                    }
-                    pixels[i + c] = value;
-                }
+        for (let y = 0; y < convContext.height; y++) {
+            for (let x = 0; x < convContext.width; x++) {
+                const i = (y * convContext.width + x) * 4;
+                applyConvolutionToPixel(convContext, i, x, y);
             }
         }
         context.putImageData(imgData, 0, 0);
         callback?.();
     };
 };
+
+function applyConvolutionToPixel(ctx: ConvolutionContext, pixelIndex: number, x: number, y: number): void {
+    for (let c = 0; c < 3; c++) {
+        ctx.pixels[pixelIndex + c] = computeConvolutionValue(ctx, x, y, c);
+    }
+}
+
+function computeConvolutionValue(ctx: ConvolutionContext, x: number, y: number, channel: number): number {
+    let value = 0;
+    for (let ky = -ctx.kernelHalfSize; ky <= ctx.kernelHalfSize; ky++) {
+        for (let kx = -ctx.kernelHalfSize; kx <= ctx.kernelHalfSize; kx++) {
+            const pixelY = y + ky;
+            const pixelX = x + kx;
+            if (isPixelInBounds(pixelX, pixelY, ctx.width, ctx.height)) {
+                const pixelIndex = (pixelY * ctx.width + pixelX) * 4;
+                const kernelIndex = (ky + ctx.kernelHalfSize) * ctx.kernelSize + (kx + ctx.kernelHalfSize);
+                value += ctx.originalPixels[pixelIndex + channel] * ctx.kernel[kernelIndex];
+            }
+        }
+    }
+    return value;
+}
+
+function isPixelInBounds(x: number, y: number, width: number, height: number): boolean {
+    return y >= 0 && y < height && x >= 0 && x < width;
+}
 
 export const COLORMAP = (stops: number[][], centerpoint: number = 128): FilterProcessor => {
     const colormap = new Array(256);

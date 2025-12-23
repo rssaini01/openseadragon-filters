@@ -72,10 +72,11 @@ export const availableFilters = [
         name: 'Dilation',
         help: 'The dilation kernel size must be an odd number.',
         sync: true,
-        defaultValue: 127,
+        defaultValue: 3,
         renderControl: (onChange, value) => h(Slider, {
             value: value || 3,
             min: 3,
+            max: 51,
             step: 2,
             onChange
         }),
@@ -85,10 +86,11 @@ export const availableFilters = [
         name: 'Erosion',
         help: 'The erosion kernel size must be an odd number.',
         sync: true,
-        defaultValue: 127,
+        defaultValue: 3,
         renderControl: (onChange, value) => h(Slider, {
             value: value || 3,
             min: 3,
+            max: 51,
             step: 2,
             onChange
         }),
