@@ -1,90 +1,358 @@
-/*
-This software was developed at the National Institute of Standards and
-Technology by employees of the Federal Government in the course of
-their official duties. Pursuant to title 17 Section 105 of the United
-States Code this software is not subject to copyright protection and is
-in the public domain. This software is an experimental system. NIST assumes
-no responsibility whatsoever for its use by other parties, and makes no
-guarantees, expressed or implied, about its quality, reliability, or
-any other characteristic. We would appreciate acknowledgement if the
-software is used.
-*/
-.demo {
-    line-height: normal;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.demo h3 {
-    margin-top: 5px;
-    margin-bottom: 5px;
+:root {
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --secondary: #764ba2;
+    --bg-dark: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --success: #10b981;
+    --danger: #ef4444;
+    --shadow: rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.header {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+}
+
+.github-link:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+}
+
+.main {
+    padding: 32px 0;
+}
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    align-items: start;
+}
+
+.viewer-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 40px var(--shadow);
 }
 
 #openseadragon {
     width: 100%;
     height: 700px;
-    background-color: black;
+    background: #000;
 }
 
-.wdzt-table-layout {
-    display: table;
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.wdzt-row-layout {
-    display: table-row;
+.card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px var(--shadow);
 }
 
-.wdzt-cell-layout {
-    display: table-cell;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-.wdzt-full-width {
-    width: 100%;
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
-.wdzt-menu-slider {
-    margin-left: 10px;
-    margin-right: 10px;
-    width: 200px;
-    vertical-align: middle;
+.badge {
+    background: rgba(102, 126, 234, 0.2);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.column-2 {
-    width: 50%;
-    vertical-align: top;
-    padding: 3px;
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 
-#available {
-    list-style-type: none;
-}
-
-ul {
-    padding: 0;
-    border: 1px solid black;
-    min-height: 25px;
-}
-
-li {
-    padding: 3px;
-}
-
-#selected {
-    list-style-type: none;
-    cursor: move;
-}
-
-#selected li {
-    cursor: move;
-}
-
-.button {
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    vertical-align: text-top;
+    transition: all 0.2s;
+    font-family: inherit;
 }
 
-.filterLabel {
-    min-width: 120px;
+.filter-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: var(--primary);
+    transform: translateY(-2px);
 }
 
-#selected .filterLabel {
+.filter-btn-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.selected-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 60px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.filter-item {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
     cursor: move;
+    transition: all 0.2s;
+}
+
+.filter-item:hover {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: var(--primary);
+}
+
+.filter-item-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.drag-handle {
+    color: var(--text-secondary);
+    cursor: move;
+    font-size: 18px;
+}
+
+.filter-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.remove-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.remove-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.filter-control {
+    padding-left: 30px;
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.slider-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(51, 65, 85, 0.8);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    transition: all 0.2s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    transition: all 0.2s;
+}
+
+.slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+}
+
+.info-text {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 3px solid var(--primary);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+@media (max-width: 1200px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls-section {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #openseadragon {
+        height: 500px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+    }
 }

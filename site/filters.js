@@ -67,5 +67,31 @@ export const availableFilters = [
             onChange
         }),
         getFilter: (value) => Filters.THRESHOLDING(value || 127)
+    },
+    {
+        name: 'Dilation',
+        help: 'The dilation kernel size must be an odd number.',
+        sync: true,
+        defaultValue: 127,
+        renderControl: (onChange, value) => h(Slider, {
+            value: value || 3,
+            min: 3,
+            step: 2,
+            onChange
+        }),
+        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.max)
+    },
+    {
+        name: 'Erosion',
+        help: 'The erosion kernel size must be an odd number.',
+        sync: true,
+        defaultValue: 127,
+        renderControl: (onChange, value) => h(Slider, {
+            value: value || 3,
+            min: 3,
+            step: 2,
+            onChange
+        }),
+        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.min)
     }
 ].sort((a, b) => a.name.localeCompare(b.name));

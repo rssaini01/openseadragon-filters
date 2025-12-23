@@ -11,16 +11,11 @@ export default function Slider({ value, min, max, step, onChange }) {
   };
 
   return (
-    <div>
-      <input
-        type="number"
-        value={val}
-        min={min}
-        max={max}
-        step={step}
-        onChange={handleChange}
-        style={{ width: '80px', marginRight: '10px' }}
-      />
+    <div className="slider-container">
+      <div className="slider-label">
+        <span>Range: {min} - {max}</span>
+        <span className="slider-value">{val}</span>
+      </div>
       <input
         type="range"
         value={val}
@@ -28,7 +23,7 @@ export default function Slider({ value, min, max, step, onChange }) {
         max={max}
         step={step}
         onChange={handleChange}
-        className="wdzt-menu-slider"
+        className="slider"
       />
     </div>
   );

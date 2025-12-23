@@ -2,16 +2,17 @@ import { h } from 'preact';
 
 export default function FilterItem({ filter, onRemove, children }) {
   return (
-    <div className="wdzt-table-layout">
-      <div className="wdzt-row-layout">
-        <div className="wdzt-cell-layout">
-          <button onClick={onRemove} className={"button"}>-</button>
-        </div>
-        <div className="wdzt-cell-layout filterLabel">&nbsp;{filter.name}</div>
-        <div className="wdzt-cell-layout wdzt-full-width">
+    <div className="filter-item">
+      <div className="filter-item-header">
+        <span className="drag-handle">☰</span>
+        <span className="filter-name">{filter.name}</span>
+        <button onClick={onRemove} className="remove-btn">×</button>
+      </div>
+      {children && (
+        <div className="filter-control">
           {children}
         </div>
-      </div>
+      )}
     </div>
   );
 }
