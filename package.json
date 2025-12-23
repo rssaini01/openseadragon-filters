@@ -1,7 +1,7 @@
 {
   "name": "openseadragon-filters",
-  "version": "2.0.0",
-  "description": "OpenSeadragon plugin providing filtering capabilities to the images.",
+  "version": "2.0.1",
+  "description": "A plugin that provides the capability to apply filters to images in OpenSeadragon.",
   "type": "module",
   "main": "dist/cjs/openseadragon-filters.js",
   "module": "dist/esm/openseadragon-filters.js",
