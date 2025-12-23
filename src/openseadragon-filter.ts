@@ -57,10 +57,10 @@ interface TileDrawingEvent {
 /**
  * Initialize filtering for an OpenSeadragon viewer
  */
-export function initializeFiltering(viewer: OpenSeadragonViewer, options?: FilterOptions): FilterPlugin {
+export const initializeFiltering = (viewer: OpenSeadragonViewer, options?: FilterOptions): FilterPlugin => {
     const pluginOptions: FilterPluginOptions = { ...options, viewer };
     return new FilterPlugin(pluginOptions);
-}
+};
 
 export class FilterPlugin {
     viewer: OpenSeadragonViewer;
@@ -75,99 +75,101 @@ export class FilterPlugin {
         if (!options.viewer) {
             throw new Error('A viewer must be specified.');
         }
-        const self = this;
         this.viewer = options.viewer;
         this.filterIncrement = 0;
 
-        this.viewer.addHandler('tile-loaded', tileLoadedHandler);
-        this.viewer.addHandler('tile-drawing', tileDrawingHandler);
-
+        this.initViewerHandlers();
         setOptions(this, options);
+    }
 
-        function tileLoadedHandler(event: TileLoadedEvent): void {
-            const processors = getFiltersProcessors(self, event.tiledImage);
-            if (processors.length === 0) return;
+    private readonly initViewerHandlers = () => {
+        this.viewer.addHandler('tile-loaded', this.tileLoadedHandler);
+        this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
+    };
 
-            const tile = event.tile;
-            const image = event.image;
-            if (image) {
-                const canvas = document.createElement('canvas');
-                canvas.width = image.width;
-                canvas.height = image.height;
-                const context = canvas.getContext('2d')!;
-                context.drawImage(image, 0, 0);
-                tile._renderedContext = context;
-                const callback = event.getCompletionCallback();
-                applyFilters(context, processors, callback);
-                tile._filterIncrement = self.filterIncrement;
-            }
+    private readonly tileLoadedHandler = (event: TileLoadedEvent): void => {
+        const processors = getFiltersProcessors(this, event.tiledImage);
+        if (processors.length === 0) return;
+
+        const tile = event.tile;
+        const image = event.image;
+        if (image) {
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const context = canvas.getContext('2d')!;
+            context.drawImage(image, 0, 0);
+            tile._renderedContext = context;
+            const callback = event.getCompletionCallback();
+            this.applyFilters(context, processors, callback);
+            tile._filterIncrement = this.filterIncrement;
         }
+    };
 
-        function applyFilters(context: CanvasRenderingContext2D, filtersProcessors: FilterProcessor[], callback?: () => void): void {
-            if (callback) {
-                const currentIncrement = self.filterIncrement;
-                const callbacks: (() => void)[] = [];
-                for (let i = 0; i < filtersProcessors.length - 1; i++) {
-                    callbacks[i] = () => {
-                        if (self.filterIncrement !== currentIncrement) return;
-                        filtersProcessors[i + 1](context, callbacks[i + 1]);
-                    };
-                }
-                callbacks[filtersProcessors.length - 1] = () => {
-                    if (self.filterIncrement !== currentIncrement) return;
-                    callback();
+    private readonly applyFilters = (context: CanvasRenderingContext2D, filtersProcessors: FilterProcessor[], callback?: () => void): void => {
+        if (callback) {
+            const currentIncrement = this.filterIncrement;
+            const callbacks: (() => void)[] = [];
+            for (let i = 0; i < filtersProcessors.length - 1; i++) {
+                callbacks[i] = () => {
+                    if (this.filterIncrement !== currentIncrement) return;
+                    filtersProcessors[i + 1](context, callbacks[i + 1]);
                 };
-                filtersProcessors[0](context, callbacks[0]);
-            } else {
-                for (const processor of filtersProcessors) {
-                    processor(context, () => {});
-                }
+            }
+            callbacks[filtersProcessors.length - 1] = () => {
+                if (this.filterIncrement !== currentIncrement) return;
+                callback();
+            };
+            filtersProcessors[0](context, callbacks[0]);
+        } else {
+            for (const processor of filtersProcessors) {
+                processor(context, () => {});
             }
         }
+    };
 
-        function tileDrawingHandler(event: TileDrawingEvent): void {
-            const tile = event.tile;
-            const rendered = event.rendered;
-            if (rendered._filterIncrement === self.filterIncrement) return;
+    private readonly tileDrawingHandler = (event: TileDrawingEvent): void => {
+        const tile = event.tile;
+        const rendered = event.rendered;
+        if (rendered._filterIncrement === this.filterIncrement) return;
 
-            const processors = getFiltersProcessors(self, event.tiledImage);
-            if (processors.length === 0) {
-                if (rendered._originalImageData) {
-                    rendered.putImageData(rendered._originalImageData, 0, 0);
-                    delete rendered._originalImageData;
-                }
-                rendered._filterIncrement = self.filterIncrement;
-                return;
-            }
-
+        const processors = getFiltersProcessors(this, event.tiledImage);
+        if (processors.length === 0) {
             if (rendered._originalImageData) {
                 rendered.putImageData(rendered._originalImageData, 0, 0);
-            } else {
-                rendered._originalImageData = rendered.getImageData(0, 0, rendered.canvas.width, rendered.canvas.height);
+                delete rendered._originalImageData;
             }
+            rendered._filterIncrement = this.filterIncrement;
+            return;
+        }
 
-            if (tile._renderedContext && tile._filterIncrement === self.filterIncrement) {
-                const imgData = tile._renderedContext.getImageData(0, 0,
-                    tile._renderedContext.canvas.width, tile._renderedContext.canvas.height);
-                rendered.putImageData(imgData, 0, 0);
-                delete tile._renderedContext;
-                delete tile._filterIncrement;
-                rendered._filterIncrement = self.filterIncrement;
-                return;
-            }
+        if (rendered._originalImageData) {
+            rendered.putImageData(rendered._originalImageData, 0, 0);
+        } else {
+            rendered._originalImageData = rendered.getImageData(0, 0, rendered.canvas.width, rendered.canvas.height);
+        }
 
+        if (tile._renderedContext && tile._filterIncrement === this.filterIncrement) {
+            const imgData = tile._renderedContext.getImageData(0, 0,
+                tile._renderedContext.canvas.width, tile._renderedContext.canvas.height);
+            rendered.putImageData(imgData, 0, 0);
             delete tile._renderedContext;
             delete tile._filterIncrement;
-            applyFilters(rendered, processors);
-            rendered._filterIncrement = self.filterIncrement;
+            rendered._filterIncrement = this.filterIncrement;
+            return;
         }
-    }
+
+        delete tile._renderedContext;
+        delete tile._filterIncrement;
+        this.applyFilters(rendered, processors);
+        rendered._filterIncrement = this.filterIncrement;
+    };
 }
 
 function setOptions(instance: FilterPlugin, options?: FilterOptions): void {
     options = options || {};
-    const filters = options.filters;
-    instance.filters = !filters ? [] : Array.isArray(filters) ? filters : [filters];
+    const filters = Array.isArray(options.filters) ? options.filters : [options.filters];
+    instance.filters = filters || [];
 
     for (const filter of instance.filters) {
         if (!filter.processors) {
