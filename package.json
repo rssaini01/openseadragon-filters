@@ -3,13 +3,13 @@
   "version": "2.0.0",
   "description": "OpenSeadragon plugin providing filtering capabilities to the images.",
   "type": "module",
-  "main": "dist/cjs/openseadragon-filtering.js",
-  "module": "dist/esm/openseadragon-filtering.js",
-  "types": "dist/types/openseadragon-filtering.d.ts",
+  "main": "dist/cjs/openseadragon-filters.js",
+  "module": "dist/esm/openseadragon-filters.js",
+  "types": "dist/types/openseadragon-filters.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/esm/openseadragon-filtering.js",
-      "require": "./dist/cjs/openseadragon-filtering.js"
+      "import": "./dist/esm/openseadragon-filters.js",
+      "require": "./dist/cjs/openseadragon-filters.js"
     }
   },
   "engines": {
@@ -21,10 +21,16 @@
     "LICENSE"
   ],
   "scripts": {
+    "clean": "node ./scripts/clean.mjs",
     "build": "npm run build:dual",
     "build:dual": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+    "dev": "vite --config site/vite.config.ts",
+    "build:demo": "npm run build && vite build --config site/vite.config.ts --mode prod",
+    "deploy:demo": "npm run build && npm run build:demo && git subtree push --prefix site/dist origin gh-pages",
+    "preview": "vite preview --config site/vite.config.ts",
     "watch": "tsc --watch",
-    "clean": "node ./scripts/clean.mjs"
+    "test": "echo 'No tests are added'",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -43,9 +49,13 @@
   },
   "homepage": "https://github.com/rssaini01/openseadragon-filters#readme",
   "devDependencies": {
+    "@preact/signals": "^2.5.1",
     "@types/node": "^25.0.3",
     "@types/openseadragon": "^5.0.1",
     "openseadragon": "^5.0.1",
-    "typescript": "^5.9.3"
+    "preact": "^10.28.0",
+    "sortablejs": "^1.15.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
   }
 }
