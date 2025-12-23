@@ -2,33 +2,19 @@
  * @author Ravi Shankar Saini <sainiravi015@gmail.com>
  */
 
+import type OpenSeadragon from 'openseadragon';
+
 export * from './predefined-filters';
 
-interface OpenSeadragonTile {
+interface ExtendedTile extends OpenSeadragon.Tile {
     _renderedContext?: CanvasRenderingContext2D;
     _filterIncrement?: number;
-}
-
-interface OpenSeadragonTiledImage {
-    reset(): void;
-}
-
-interface OpenSeadragonWorld {
-    getItemAt(index: number): OpenSeadragonTiledImage;
-}
-
-interface OpenSeadragonViewer {
-    world: OpenSeadragonWorld;
-    addHandler(event: string, handler: Function): void;
-    forceRedraw(): void;
-    drawer?: any;
-    drawerType?: string[];
 }
 
 export type FilterProcessor = (context: CanvasRenderingContext2D, callback?: () => void) => void;
 
 export interface Filter {
-    items?: OpenSeadragonTiledImage | OpenSeadragonTiledImage[];
+    items?: OpenSeadragon.TiledImage | OpenSeadragon.TiledImage[];
     processors: FilterProcessor | FilterProcessor[];
 }
 
@@ -39,37 +25,35 @@ export interface FilterOptions {
 }
 
 export interface FilterPluginOptions extends FilterOptions {
-    viewer: OpenSeadragonViewer;
+    viewer: OpenSeadragon.Viewer;
     forceCanvasDrawer?: boolean;
 }
 
-interface TileLoadedEvent {
-    tile: OpenSeadragonTile;
-    image: HTMLImageElement | null | undefined;
-    tiledImage: OpenSeadragonTiledImage;
-    getCompletionCallback(): () => void;
+interface ExtendedTileLoadedEvent extends OpenSeadragon.TileLoadedEvent {
+    tile: ExtendedTile;
 }
 
-interface TileDrawingEvent {
-    tile: OpenSeadragonTile;
+interface ExtendedTileDrawingEvent {
+    tile: ExtendedTile;
     rendered: CanvasRenderingContext2D & {
         _originalImageData?: ImageData;
         _filterIncrement?: number;
-        canvas: HTMLCanvasElement;
     };
-    tiledImage: OpenSeadragonTiledImage;
+    tiledImage: OpenSeadragon.TiledImage;
+    eventSource: OpenSeadragon.Viewer;
+    userData: unknown;
 }
 
 /**
  * Initialize filtering for an OpenSeadragon viewer
  */
-export const initializeFiltering = (viewer: OpenSeadragonViewer, options?: FilterOptions): FilterPlugin => {
+export const initializeFiltering = (viewer: OpenSeadragon.Viewer, options?: FilterOptions): FilterPlugin => {
     const pluginOptions: FilterPluginOptions = { ...options, viewer };
     return new FilterPlugin(pluginOptions);
 };
 
 export class FilterPlugin {
-    viewer: OpenSeadragonViewer;
+    viewer: OpenSeadragon.Viewer;
     filterIncrement: number;
     filters: Filter[] = [];
 
@@ -96,18 +80,16 @@ export class FilterPlugin {
         const drawer = this.viewer.drawer;
         if (drawer && drawer.constructor.name !== 'CanvasDrawer') {
             console.warn('WebGL drawer detected. Filters require Canvas drawer. Switching to Canvas drawer.');
-            if (this.viewer.drawerType) {
-                this.viewer.drawerType = ['canvas'];
-            }
+            this.viewer.requestDrawer('canvas', { mainDrawer: true, redrawImmediately: false, drawerOptions: {} });
         }
     };
 
     private readonly initViewerHandlers = () => {
         this.viewer.addHandler('tile-loaded', this.tileLoadedHandler);
-        this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
+        this.viewer.addHandler('tile-drawing', this.tileDrawingHandler as any);
     };
 
-    private readonly tileLoadedHandler = (event: TileLoadedEvent): void => {
+    private readonly tileLoadedHandler = (event: ExtendedTileLoadedEvent): void => {
         const processors = getFiltersProcessors(this, event.tiledImage);
         if (processors.length === 0) return;
 
@@ -148,9 +130,11 @@ export class FilterPlugin {
         }
     };
 
-    private readonly tileDrawingHandler = (event: TileDrawingEvent): void => {
+    private readonly tileDrawingHandler = (event: ExtendedTileDrawingEvent): void => {
         const tile = event.tile;
         const rendered = event.rendered;
+        
+        if (!rendered) return;
         if (rendered._filterIncrement === this.filterIncrement) return;
 
         const processors = getFiltersProcessors(this, event.tiledImage);
@@ -220,8 +204,8 @@ function resetFilteredItems(instance: FilterPlugin): void {
     }
 }
 
-function collectItemsToReset(filters: Filter[], world: OpenSeadragonWorld): OpenSeadragonTiledImage[] {
-    const itemsToReset: OpenSeadragonTiledImage[] = [];
+function collectItemsToReset(filters: Filter[], world: OpenSeadragon.World): OpenSeadragon.TiledImage[] {
+    const itemsToReset: OpenSeadragon.TiledImage[] = [];
 
     for (const filter of filters) {
         if (!filter.items) {
@@ -233,7 +217,7 @@ function collectItemsToReset(filters: Filter[], world: OpenSeadragonWorld): Open
     return itemsToReset;
 }
 
-function addFilterItemsToReset(items: OpenSeadragonTiledImage | OpenSeadragonTiledImage[], itemsToReset: OpenSeadragonTiledImage[]): void {
+function addFilterItemsToReset(items: OpenSeadragon.TiledImage | OpenSeadragon.TiledImage[], itemsToReset: OpenSeadragon.TiledImage[]): void {
     if (Array.isArray(items)) {
         for (const item of items) {
             addItemToReset(item, itemsToReset);
@@ -243,22 +227,22 @@ function addFilterItemsToReset(items: OpenSeadragonTiledImage | OpenSeadragonTil
     }
 }
 
-function addItemToReset(item: OpenSeadragonTiledImage, itemsToReset: OpenSeadragonTiledImage[]): void {
+function addItemToReset(item: OpenSeadragon.TiledImage, itemsToReset: OpenSeadragon.TiledImage[]): void {
     if (itemsToReset.includes(item)) {
         throw new Error('An item can not be used by multiple filters.');
     }
     itemsToReset.push(item);
 }
 
-function getAllItems(world: OpenSeadragonWorld): OpenSeadragonTiledImage[] {
-    const result: OpenSeadragonTiledImage[] = [];
-    for (let i = 0; i < (world as any).getItemCount(); i++) {
+function getAllItems(world: OpenSeadragon.World): OpenSeadragon.TiledImage[] {
+    const result: OpenSeadragon.TiledImage[] = [];
+    for (let i = 0; i < world.getItemCount(); i++) {
         result.push(world.getItemAt(i));
     }
     return result;
 }
 
-function getFiltersProcessors(instance: FilterPlugin, item: OpenSeadragonTiledImage): FilterProcessor[] {
+function getFiltersProcessors(instance: FilterPlugin, item: OpenSeadragon.TiledImage): FilterProcessor[] {
     if (instance.filters.length === 0) return [];
 
     const globalProcessors: FilterProcessor[] = [];

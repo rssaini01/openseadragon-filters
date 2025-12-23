@@ -33,6 +33,7 @@ export const availableFilters = [
     },
     {
         name: 'Gamma',
+        sync: true,
         help: 'Range is from 0 to 5. Values between 0 and 1 lessen contrast, values > 1 increase it.',
         defaultValue: 0.5,
         renderControl: (onChange, value) => h(Slider, {
