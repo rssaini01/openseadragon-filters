@@ -2,9 +2,12 @@ import { h } from 'preact';
 import { useState, useEffect, useRef } from 'preact/hooks';
 import Sortable from 'sortablejs';
 import OpenSeadragon from 'openseadragon';
-import { initializeFiltering } from '../src/openseadragon-filter';
+import { initializeFiltering, initWebGLFiltering, convertToWebGLFilter } from '../src/openseadragon-filter';
 import { availableFilters } from './filters';
 import FilterItem from './components/FilterItem';
+import * as Shaders from '../src/webgl-shaders';
+
+const USE_WEBGL_DRAWER = true; // Toggle between Canvas and WebGL drawer
 
 export default function App() {
     const [selectedFilters, setSelectedFilters] = useState([]);
@@ -19,10 +22,11 @@ export default function App() {
             prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
             tileSources: '//openseadragon.github.io/example-images/highsmith/highsmith.dzi',
             crossOriginPolicy: 'Anonymous',
-            drawer: 'canvas'
+            drawer: USE_WEBGL_DRAWER ? 'webgl' : 'canvas'
         });
         setViewer(v);
-        const plugin = initializeFiltering(v, { forceCanvasDrawer: true });
+
+        const plugin = USE_WEBGL_DRAWER ? initWebGLFiltering(v) : initializeFiltering(v);
         setFilterPlugin(plugin);
     }, []);
 
@@ -70,13 +74,29 @@ export default function App() {
     const updateFilters = () => {
         if (!filterPlugin) return;
 
-        const filters = selectedFilters.map(f => f.getFilter(f.value));
-        const sync = selectedFilters.every(f => f.sync);
+        if (USE_WEBGL_DRAWER) {
+            const webglFilters = selectedFilters.map(f => {
+                const name = f.name.toLowerCase();
+                const value = f.value === undefined ? f.defaultValue : f.value;
 
-        filterPlugin.setFilterOptions({
-            filters: { processors: filters },
-            loadMode: sync ? 'sync' : 'async'
-        });
+                if (name === 'brightness') return convertToWebGLFilter('brightness', Shaders.brightnessShader, { u_adjustment: value });
+                if (name === 'contrast') return convertToWebGLFilter('contrast', Shaders.contrastShader, { u_adjustment: value });
+                if (name === 'gamma') return convertToWebGLFilter('gamma', Shaders.gammaShader, { u_adjustment: value });
+                if (name === 'greyscale') return convertToWebGLFilter('greyscale', Shaders.greyscaleShader, {});
+                if (name === 'invert') return convertToWebGLFilter('invert', Shaders.invertShader, {});
+                if (name === 'thresholding') return convertToWebGLFilter('threshold', Shaders.thresholdShader, { u_threshold: value });
+                return null;
+            }).filter(Boolean);
+
+            filterPlugin.setFilters(webglFilters);
+        } else {
+            const filters = selectedFilters.map(f => f.getFilter(f.value));
+            const sync = selectedFilters.every(f => f.sync);
+            filterPlugin.setFilterOptions({
+                filters: { processors: filters },
+                loadMode: sync ? 'sync' : 'async'
+            });
+        }
     };
 
     return (

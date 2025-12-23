@@ -2,6 +2,8 @@ import { h } from 'preact';
 import Slider from './components/Slider';
 import * as Filters from '../src/openseadragon-filter';
 
+const USE_WEBGL = true; // Toggle between Canvas and WebGL filters
+
 export const availableFilters = [
     {
         name: 'Brightness',
@@ -15,7 +17,7 @@ export const availableFilters = [
             step: 1,
             onChange
         }),
-        getFilter: (value) => Filters.BRIGHTNESS(value || 50)
+        getFilter: (value) => USE_WEBGL ? Filters.BRIGHTNESS_WEBGL(value || 50) : Filters.BRIGHTNESS(value || 50)
     },
     {
         name: 'Contrast',
@@ -29,7 +31,7 @@ export const availableFilters = [
             step: 0.1,
             onChange
         }),
-        getFilter: (value) => Filters.CONTRAST(value || 1.3)
+        getFilter: (value) => USE_WEBGL ? Filters.CONTRAST_WEBGL(value || 1.3) : Filters.CONTRAST(value || 1.3)
     },
     {
         name: 'Gamma',
@@ -43,17 +45,17 @@ export const availableFilters = [
             step: 0.1,
             onChange
         }),
-        getFilter: (value) => Filters.GAMMA(value || 0.5)
+        getFilter: (value) => USE_WEBGL ? Filters.GAMMA_WEBGL(value || 0.5) : Filters.GAMMA(value || 0.5)
     },
     {
         name: 'Greyscale',
         sync: true,
-        getFilter: () => Filters.GREYSCALE()
+        getFilter: () => USE_WEBGL ? Filters.GREYSCALE_WEBGL() : Filters.GREYSCALE()
     },
     {
         name: 'Invert',
         sync: true,
-        getFilter: () => Filters.INVERT()
+        getFilter: () => USE_WEBGL ? Filters.INVERT_WEBGL() : Filters.INVERT()
     },
     {
         name: 'Thresholding',
@@ -67,7 +69,7 @@ export const availableFilters = [
             step: 1,
             onChange
         }),
-        getFilter: (value) => Filters.THRESHOLDING(value || 127)
+        getFilter: (value) => USE_WEBGL ? Filters.THRESHOLDING_WEBGL(value || 127) : Filters.THRESHOLDING(value || 127)
     },
     {
         name: 'Dilation',
