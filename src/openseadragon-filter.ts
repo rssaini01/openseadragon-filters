@@ -65,7 +65,7 @@ export const initializeFiltering = (viewer: OpenSeadragonViewer, options?: Filte
 export class FilterPlugin {
     viewer: OpenSeadragonViewer;
     filterIncrement: number;
-    filters: Filter[];
+    filters: Filter[] = [];
 
     setFilterOptions(options?: FilterOptions): void {
         setOptions(this, options);
@@ -168,8 +168,8 @@ export class FilterPlugin {
 
 function setOptions(instance: FilterPlugin, options?: FilterOptions): void {
     options = options || {};
-    const filters = Array.isArray(options.filters) ? options.filters : [options.filters];
-    instance.filters = filters || [];
+    const filters = options.filters ? (Array.isArray(options.filters) ? options.filters : [options.filters]) : [];
+    instance.filters = filters;
 
     for (const filter of instance.filters) {
         if (!filter.processors) {
