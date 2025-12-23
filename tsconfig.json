@@ -1,24 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": [
-      "ES2018",
-      "DOM"
-    ],
-    "outDir": "./dist",
-    "rootDir": "./",
-    "strict": true,
+    "target": "ES2020",
+    "rootDir": "src",
+    "moduleResolution": "Node",
+    "removeComments": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
+    "strict": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": "."
   },
   "include": [
-    "src/openseadragon-filter.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

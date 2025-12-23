@@ -168,8 +168,7 @@ export class FilterPlugin {
 
 function setOptions(instance: FilterPlugin, options?: FilterOptions): void {
     options = options || {};
-    const filters = options.filters ? (Array.isArray(options.filters) ? options.filters : [options.filters]) : [];
-    instance.filters = filters;
+    instance.filters = options.filters ? (Array.isArray(options.filters) ? options.filters : [options.filters]) : [];
 
     for (const filter of instance.filters) {
         if (!filter.processors) {

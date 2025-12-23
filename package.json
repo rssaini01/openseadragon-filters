@@ -2,11 +2,29 @@
   "name": "openseadragon-filters",
   "version": "2.0.0",
   "description": "OpenSeadragon plugin providing filtering capabilities to the images.",
-  "main": "dist/openseadragon-filtering.js",
-  "types": "dist/openseadragon-filtering.d.ts",
+  "type": "module",
+  "main": "dist/cjs/openseadragon-filtering.js",
+  "module": "dist/esm/openseadragon-filtering.js",
+  "types": "dist/types/openseadragon-filtering.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/openseadragon-filtering.js",
+      "require": "./dist/cjs/openseadragon-filtering.js"
+    }
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc",
-    "test": "echo 'No tests are added'"
+    "build": "npm run build:dual",
+    "build:dual": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+    "watch": "tsc --watch",
+    "clean": "node ./scripts/clean.mjs"
   },
   "repository": {
     "type": "git",
