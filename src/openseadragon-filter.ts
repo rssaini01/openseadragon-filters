@@ -2,6 +2,8 @@
  * @author Ravi Shankar Saini <sainiravi015@gmail.com>
  */
 
+export * from './predefined-filters';
+
 interface OpenSeadragonTile {
     _renderedContext?: CanvasRenderingContext2D;
     _filterIncrement?: number;
@@ -84,7 +86,11 @@ export class FilterPlugin {
 
     private readonly initViewerHandlers = () => {
         this.viewer.addHandler('tile-loaded', this.tileLoadedHandler);
-        this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
+        try {
+            this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
+        } catch (e) {
+            console.warn('tile-drawing event not supported (WebGLDrawer does not support filters)');
+        }
     };
 
     private readonly tileLoadedHandler = (event: TileLoadedEvent): void => {
