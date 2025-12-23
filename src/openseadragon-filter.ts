@@ -21,6 +21,8 @@ interface OpenSeadragonViewer {
     world: OpenSeadragonWorld;
     addHandler(event: string, handler: Function): void;
     forceRedraw(): void;
+    drawer?: any;
+    drawerType?: string[];
 }
 
 export type FilterProcessor = (context: CanvasRenderingContext2D, callback?: () => void) => void;
@@ -33,10 +35,12 @@ export interface Filter {
 export interface FilterOptions {
     filters?: Filter | Filter[];
     loadMode?: 'sync' | 'async';
+    forceCanvasDrawer?: boolean;
 }
 
 export interface FilterPluginOptions extends FilterOptions {
     viewer: OpenSeadragonViewer;
+    forceCanvasDrawer?: boolean;
 }
 
 interface TileLoadedEvent {
@@ -80,17 +84,27 @@ export class FilterPlugin {
         this.viewer = options.viewer;
         this.filterIncrement = 0;
 
+        if (options.forceCanvasDrawer) {
+            this.ensureCanvasDrawer();
+        }
+
         this.initViewerHandlers();
         setOptions(this, options);
     }
 
+    private readonly ensureCanvasDrawer = () => {
+        const drawer = this.viewer.drawer;
+        if (drawer && drawer.constructor.name !== 'CanvasDrawer') {
+            console.warn('WebGL drawer detected. Filters require Canvas drawer. Switching to Canvas drawer.');
+            if (this.viewer.drawerType) {
+                this.viewer.drawerType = ['canvas'];
+            }
+        }
+    };
+
     private readonly initViewerHandlers = () => {
         this.viewer.addHandler('tile-loaded', this.tileLoadedHandler);
-        try {
-            this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
-        } catch (e) {
-            console.warn('tile-drawing event not supported (WebGLDrawer does not support filters)');
-        }
+        this.viewer.addHandler('tile-drawing', this.tileDrawingHandler);
     };
 
     private readonly tileLoadedHandler = (event: TileLoadedEvent): void => {
