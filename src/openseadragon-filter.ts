@@ -4,10 +4,6 @@
 
 import OpenSeadragon from 'openseadragon';
 
-export * from './predefined-filters';
-export * from './webgl-filters';
-export * from './webgl-overlay-filter';
-
 interface ExtendedTile extends OpenSeadragon.Tile {
     _renderedContext?: CanvasRenderingContext2D;
     _filterIncrement?: number;

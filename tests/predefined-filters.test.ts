@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { BRIGHTNESS, CONTRAST, GAMMA, GREYSCALE, INVERT, THRESHOLDING } from '../src/predefined-filters';
+import { BRIGHTNESS, CONTRAST, GAMMA, GREYSCALE, INVERT, THRESHOLDING } from '../src';
 
 // Mock canvas context
 const createMockContext = (width = 100, height = 100) => {
@@ -8,7 +8,7 @@ const createMockContext = (width = 100, height = 100) => {
     width,
     height
   };
-  
+
   return {
     getImageData: vi.fn(() => imageData),
     putImageData: vi.fn(),
@@ -22,9 +22,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = BRIGHTNESS(50);
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
@@ -36,9 +36,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = CONTRAST(1.5);
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
@@ -50,9 +50,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = GAMMA(2.0);
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
@@ -64,9 +64,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = GREYSCALE();
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
@@ -78,9 +78,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = INVERT();
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
@@ -92,9 +92,9 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = THRESHOLDING(128);
-      
+
       filter(context as any, callback);
-      
+
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();

@@ -2,7 +2,7 @@ import { h } from 'preact';
 import { useState, useEffect, useRef } from 'preact/hooks';
 import Sortable from 'sortablejs';
 import OpenSeadragon from 'openseadragon';
-import { initializeFiltering, initWebGLFiltering, convertToWebGLFilter } from '../src/openseadragon-filter';
+import { initializeFiltering, initWebGLFiltering, convertToWebGLFilter } from '../src/index.ts';
 import { availableFilters } from './filters';
 import FilterItem from './components/FilterItem';
 import * as Shaders from '../src/webgl-shaders';

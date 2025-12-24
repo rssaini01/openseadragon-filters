@@ -3,13 +3,14 @@
   "version": "2.0.1",
   "description": "A plugin that provides the capability to apply filters to images in OpenSeadragon.",
   "type": "module",
-  "main": "dist/cjs/openseadragon-filters.js",
-  "module": "dist/esm/openseadragon-filters.js",
-  "types": "dist/types/openseadragon-filters.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/esm/openseadragon-filters.js",
-      "require": "./dist/cjs/openseadragon-filters.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
   "workspaces": [
