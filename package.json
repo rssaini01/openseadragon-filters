@@ -12,6 +12,9 @@
       "require": "./dist/cjs/openseadragon-filters.js"
     }
   },
+  "workspaces": [
+    "site"
+  ],
   "engines": {
     "node": ">=20.0"
   },
@@ -24,10 +27,10 @@
     "clean": "node ./scripts/clean.mjs",
     "build": "npm run build:dual",
     "build:dual": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
-    "dev": "vite --config site/vite.config.ts",
-    "build:demo": "npm run build && vite build --config site/vite.config.ts --mode prod",
+    "dev": "npm run dev --workspace=site",
+    "build:demo": "npm run build && npm run build --workspace=site",
     "deploy:demo": "npm run build && npm run build:demo && git subtree push --prefix site/dist origin gh-pages",
-    "preview": "vite preview --config site/vite.config.ts",
+    "preview": "npm run preview --workspace=site",
     "watch": "tsc --watch",
     "test": "echo 'No tests are added'",
     "prepare": "npm run build"
@@ -49,13 +52,7 @@
   },
   "homepage": "https://github.com/rssaini01/openseadragon-filters#readme",
   "devDependencies": {
-    "@preact/signals": "^2.5.1",
     "@types/node": "^25.0.3",
-    "@types/openseadragon": "^5.0.1",
-    "openseadragon": "^5.0.1",
-    "preact": "^10.28.0",
-    "sortablejs": "^1.15.6",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.0"
+    "typescript": "^5.9.3"
   }
 }

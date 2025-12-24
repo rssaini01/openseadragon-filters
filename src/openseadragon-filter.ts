@@ -2,7 +2,7 @@
  * @author Ravi Shankar Saini <sainiravi015@gmail.com>
  */
 
-import type OpenSeadragon from 'openseadragon';
+import OpenSeadragon from 'openseadragon';
 
 export * from './predefined-filters';
 
@@ -48,6 +48,9 @@ interface ExtendedTileDrawingEvent {
  * Initialize filtering for an OpenSeadragon viewer
  */
 export const initializeFiltering = (viewer: OpenSeadragon.Viewer, options?: FilterOptions): FilterPlugin => {
+    if (!OpenSeadragon) {
+        throw new TypeError('OpenSeadragon is not available. Please ensure OpenSeadragon is loaded before initializing filters.');
+    }
     const pluginOptions: FilterPluginOptions = { ...options, viewer };
     return new FilterPlugin(pluginOptions);
 };
@@ -133,7 +136,7 @@ export class FilterPlugin {
     private readonly tileDrawingHandler = (event: ExtendedTileDrawingEvent): void => {
         const tile = event.tile;
         const rendered = event.rendered;
-        
+
         if (!rendered) return;
         if (rendered._filterIncrement === this.filterIncrement) return;
 
