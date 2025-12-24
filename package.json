@@ -3,13 +3,14 @@
   "version": "2.0.1",
   "description": "A plugin that provides the capability to apply filters to images in OpenSeadragon.",
   "type": "module",
-  "main": "dist/cjs/openseadragon-filters.js",
-  "module": "dist/esm/openseadragon-filters.js",
-  "types": "dist/types/openseadragon-filters.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/esm/openseadragon-filters.js",
-      "require": "./dist/cjs/openseadragon-filters.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
   "workspaces": [
@@ -32,7 +33,8 @@
     "deploy:demo": "npm run build && npm run build:demo && git subtree push --prefix site/dist origin gh-pages",
     "preview": "npm run preview --workspace=site",
     "watch": "tsc --watch",
-    "test": "echo 'No tests are added'",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "npm run build"
   },
   "repository": {
@@ -53,6 +55,9 @@
   "homepage": "https://github.com/rssaini01/openseadragon-filters#readme",
   "devDependencies": {
     "@types/node": "^25.0.3",
-    "typescript": "^5.9.3"
+    "@vitest/ui": "^2.1.8",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
   }
 }

@@ -4,8 +4,6 @@
 
 import OpenSeadragon from 'openseadragon';
 
-export * from './predefined-filters';
-
 interface ExtendedTile extends OpenSeadragon.Tile {
     _renderedContext?: CanvasRenderingContext2D;
     _filterIncrement?: number;

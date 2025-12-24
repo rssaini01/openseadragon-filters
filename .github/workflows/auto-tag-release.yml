@@ -1,7 +1,10 @@
 name: Auto Tag & Release on Version Bump
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types:
+      - completed
     branches:
       - main
 
@@ -11,6 +14,7 @@ permissions:
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout repository

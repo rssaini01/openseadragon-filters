@@ -9,7 +9,8 @@
     "strict": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "declarationMap": true
   },
   "include": [
     "src/**/*"

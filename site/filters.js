@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import Slider from './components/Slider';
 import * as Filters from '../src/openseadragon-filter';
+import { USE_WEBGL_DRAWER } from "./App.jsx";
 
 export const availableFilters = [
     {
@@ -15,7 +16,7 @@ export const availableFilters = [
             step: 1,
             onChange
         }),
-        getFilter: (value) => Filters.BRIGHTNESS(value || 50)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.BRIGHTNESS_WEBGL(value || 50) : Filters.BRIGHTNESS(value || 50)
     },
     {
         name: 'Contrast',
@@ -29,7 +30,7 @@ export const availableFilters = [
             step: 0.1,
             onChange
         }),
-        getFilter: (value) => Filters.CONTRAST(value || 1.3)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.CONTRAST_WEBGL(value || 1.3) : Filters.CONTRAST(value || 1.3)
     },
     {
         name: 'Gamma',
@@ -43,17 +44,17 @@ export const availableFilters = [
             step: 0.1,
             onChange
         }),
-        getFilter: (value) => Filters.GAMMA(value || 0.5)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.GAMMA_WEBGL(value || 0.5) : Filters.GAMMA(value || 0.5)
     },
     {
         name: 'Greyscale',
         sync: true,
-        getFilter: () => Filters.GREYSCALE()
+        getFilter: () => USE_WEBGL_DRAWER ? Filters.GREYSCALE_WEBGL() : Filters.GREYSCALE()
     },
     {
         name: 'Invert',
         sync: true,
-        getFilter: () => Filters.INVERT()
+        getFilter: () => USE_WEBGL_DRAWER ? Filters.INVERT_WEBGL() : Filters.INVERT()
     },
     {
         name: 'Thresholding',
@@ -67,7 +68,7 @@ export const availableFilters = [
             step: 1,
             onChange
         }),
-        getFilter: (value) => Filters.THRESHOLDING(value || 127)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.THRESHOLDING_WEBGL(value || 127) : Filters.THRESHOLDING(value || 127)
     },
     {
         name: 'Dilation',
@@ -81,7 +82,7 @@ export const availableFilters = [
             step: 2,
             onChange
         }),
-        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.max)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.DILATION_WEBGL(value || 3) : Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.max)
     },
     {
         name: 'Erosion',
@@ -95,6 +96,6 @@ export const availableFilters = [
             step: 2,
             onChange
         }),
-        getFilter: (value) => Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.min)
+        getFilter: (value) => USE_WEBGL_DRAWER ? Filters.EROSION_WEBGL(value || 3) : Filters.MORPHOLOGICAL_OPERATION(value || 3, Math.min)
     }
 ].sort((a, b) => a.name.localeCompare(b.name));
