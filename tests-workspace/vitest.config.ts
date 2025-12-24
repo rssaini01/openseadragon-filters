@@ -4,11 +4,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['./setup.ts'],
     coverage: {
       reporter: ['text', 'json-summary', 'json'],
     },
     reporters: ['default', 'junit'],
-    outputFile: 'test-results.xml',
+    outputFile: '../test-results.xml',
   },
 });

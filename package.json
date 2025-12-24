@@ -1,6 +1,6 @@
 {
   "name": "openseadragon-filters",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A plugin that provides the capability to apply filters to images in OpenSeadragon.",
   "type": "module",
   "main": "dist/cjs/index.js",
@@ -14,7 +14,8 @@
     }
   },
   "workspaces": [
-    "site"
+    "site",
+    "tests-workspace"
   ],
   "engines": {
     "node": ">=20.0"
@@ -33,8 +34,8 @@
     "deploy:demo": "npm run build && npm run build:demo && git subtree push --prefix site/dist origin gh-pages",
     "preview": "npm run preview --workspace=site",
     "watch": "tsc --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "npm run test --workspace=tests-workspace",
+    "test:watch": "npm run test:watch --workspace=tests-workspace",
     "prepare": "npm run build"
   },
   "repository": {
@@ -54,10 +55,6 @@
   },
   "homepage": "https://github.com/rssaini01/openseadragon-filters#readme",
   "devDependencies": {
-    "@types/node": "^25.0.3",
-    "@vitest/ui": "^4.0.16",
-    "jsdom": "^25.0.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "typescript": "^5.9.3"
   }
 }
