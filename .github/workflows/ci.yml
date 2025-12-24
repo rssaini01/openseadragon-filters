@@ -1,5 +1,10 @@
 name: Build & Test
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 on:
   push:
     branches: [ main ]
@@ -24,6 +29,14 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Test Report
+          path: test-results.xml
+          reporter: java-junit
 
       - name: Build
         run: npm run build
