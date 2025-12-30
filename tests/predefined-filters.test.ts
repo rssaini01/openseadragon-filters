@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { BRIGHTNESS, CONTRAST, GAMMA, GREYSCALE, INVERT, THRESHOLDING } from '../src';
+import { BRIGHTNESS, CONTRAST, GAMMA, GREYSCALE, INVERT, THRESHOLDING, MORPHOLOGICAL_OPERATION, CONVOLUTION, COLORMAP } from '../src';
 
 // Mock canvas context
 const createMockContext = (width = 100, height = 100) => {
@@ -29,6 +29,11 @@ describe('Predefined Filters', () => {
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
     });
+
+    it('should throw error for invalid brightness values', () => {
+      expect(() => BRIGHTNESS(-300)).toThrow('Brightness adjustment must be between -255 and 255');
+      expect(() => BRIGHTNESS(300)).toThrow('Brightness adjustment must be between -255 and 255');
+    });
   });
 
   describe('CONTRAST', () => {
@@ -43,6 +48,10 @@ describe('Predefined Filters', () => {
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
     });
+
+    it('should throw error for negative contrast', () => {
+      expect(() => CONTRAST(-1)).toThrow('Contrast adjustment must be positive');
+    });
   });
 
   describe('GAMMA', () => {
@@ -56,6 +65,10 @@ describe('Predefined Filters', () => {
       expect(context.getImageData).toHaveBeenCalled();
       expect(context.putImageData).toHaveBeenCalled();
       expect(callback).toHaveBeenCalled();
+    });
+
+    it('should throw error for negative gamma', () => {
+      expect(() => GAMMA(-1)).toThrow('Gamma adjustment must be positive');
     });
   });
 
@@ -92,6 +105,90 @@ describe('Predefined Filters', () => {
       const context = createMockContext();
       const callback = vi.fn();
       const filter = THRESHOLDING(128);
+
+      filter(context as any, callback);
+
+      expect(context.getImageData).toHaveBeenCalled();
+      expect(context.putImageData).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should throw error for invalid threshold values', () => {
+      expect(() => THRESHOLDING(-1)).toThrow('Threshold must be between 0 and 255');
+      expect(() => THRESHOLDING(300)).toThrow('Threshold must be between 0 and 255');
+    });
+  });
+
+  describe('MORPHOLOGICAL_OPERATION', () => {
+    it('should apply morphological operation', () => {
+      const context = createMockContext(10, 10);
+      const callback = vi.fn();
+      const comparator = (a: number, b: number) => Math.max(a, b);
+      const filter = MORPHOLOGICAL_OPERATION(3, comparator);
+
+      filter(context as any, callback);
+
+      expect(context.getImageData).toHaveBeenCalled();
+      expect(context.putImageData).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should throw error for even kernel size', () => {
+      const comparator = (a: number, b: number) => Math.max(a, b);
+      expect(() => MORPHOLOGICAL_OPERATION(4, comparator)).toThrow('The kernel size must be an odd number');
+    });
+  });
+
+  describe('CONVOLUTION', () => {
+    it('should apply convolution filter', () => {
+      const context = createMockContext(10, 10);
+      const callback = vi.fn();
+      const kernel = [
+        0, -1, 0,
+        -1, 5, -1,
+        0, -1, 0
+      ];
+      const filter = CONVOLUTION(kernel);
+
+      filter(context as any, callback);
+
+      expect(context.getImageData).toHaveBeenCalled();
+      expect(context.putImageData).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should throw error for even kernel size', () => {
+      const kernel = [1, 2, 3, 4]; // 2x2 kernel
+      expect(() => CONVOLUTION(kernel)).toThrow('The kernel must have an odd size');
+    });
+  });
+
+  describe('COLORMAP', () => {
+    it('should apply colormap', () => {
+      const context = createMockContext(10, 10);
+      const callback = vi.fn();
+      const stops = [
+        [0, 0, 255],    // Blue
+        [0, 255, 0],    // Green
+        [255, 0, 0]     // Red
+      ];
+      const filter = COLORMAP(stops);
+
+      filter(context as any, callback);
+
+      expect(context.getImageData).toHaveBeenCalled();
+      expect(context.putImageData).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalled();
+    });
+
+    it('should apply colormap with custom centerpoint', () => {
+      const context = createMockContext(10, 10);
+      const callback = vi.fn();
+      const stops = [
+        [0, 0, 0],
+        [255, 255, 255]
+      ];
+      const filter = COLORMAP(stops, 64);
 
       filter(context as any, callback);
 
