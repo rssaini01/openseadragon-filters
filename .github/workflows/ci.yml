@@ -30,15 +30,22 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Upload test results to Codecov
+      - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./tests/coverage/coverage-final.json
-          report_type: test_results
           flags: unittests
           fail_ci_if_error: true
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          flags: unittests
 
       - name: Test Report
         uses: dorny/test-reporter@v1
