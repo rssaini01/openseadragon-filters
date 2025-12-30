@@ -1,5 +1,5 @@
 dist/
 node_modules/
 .idea
-test-results.xml
+*.xml
 tests/coverage

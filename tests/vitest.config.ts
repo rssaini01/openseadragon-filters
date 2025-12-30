@@ -20,7 +20,7 @@ export default defineConfig({
             reportsDirectory: './tests/coverage'
         },
         reporters: ['default', 'junit'],
-        outputFile: 'test-results.xml',
+        outputFile: 'test-report.junit.xml',
     },
     plugins: [
         // Put the Codecov vite plugin after all other plugins

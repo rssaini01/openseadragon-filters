@@ -36,6 +36,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./tests/coverage/coverage-final.json
+          report_type: test_results
           flags: unittests
           fail_ci_if_error: true
 
@@ -44,7 +45,7 @@ jobs:
         if: success() || failure()
         with:
           name: Test Report
-          path: test-results.xml
+          path: test-report.junit.xml
           reporter: java-junit
 
       - name: Build
