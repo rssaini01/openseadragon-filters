@@ -3,229 +3,361 @@
 [![codecov](https://codecov.io/github/rssaini01/openseadragon-filters/graph/badge.svg?token=MU0kWouujb)](https://codecov.io/github/rssaini01/openseadragon-filters)
 [![npm version](https://img.shields.io/npm/v/openseadragon-filters.svg)](https://www.npmjs.com/package/openseadragon-filters)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/rssaini01/openseadragon-filters/deploy-demo-site.yml?branch=main)](https://github.com/rssaini01/openseadragon-filters/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/rssaini01/openseadragon-filters/ci.yml?branch=main)](https://github.com/rssaini01/openseadragon-filters/actions)
 [![Downloads](https://img.shields.io/npm/dm/openseadragon-filters.svg)](https://www.npmjs.com/package/openseadragon-filters)
 
-This [OpenSeadragon](http://openseadragon.github.io/) plugin provides the capability to add filters to the images.
+A high-performance [OpenSeadragon](http://openseadragon.github.io/) plugin that provides real-time image filtering capabilities using WebGL acceleration.
 
-A demo is available [here](https://rssaini01.github.io/openseadragon-filters/) and here is
-the [NPM Package](https://www.npmjs.com/package/openseadragon-filters).
+🎨 [**Live Demo**](https://rssaini01.github.io/openseadragon-filters/) | 📦 [**NPM Package**](https://www.npmjs.com/package/openseadragon-filters)
 
-This plugin requires OpenSeadragon 5.0+.
+## Features
 
-### Basic usage
+- ⚡ **WebGL-accelerated** filtering for optimal performance
+- 🎯 **Multiple built-in filters**: brightness, contrast, gamma, threshold, invert, greyscale
+- 🔧 **Customizable**: create your own filters
+- 🎭 **Per-item filtering**: apply different filters to different images
+- 🔄 **Sync/Async modes**: choose between immediate or progressive rendering
+- 📦 **TypeScript support**: full type definitions included
+- 🌐 **Modern ESM/CJS**: supports both module formats
 
-Increase the brightness:
+## Requirements
 
-`````javascript
-import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
+- OpenSeadragon 5.0+
+- Node.js 20+ (for development)
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
+## Installation
+
+```bash
+npm install openseadragon-filters
+```
+
+or
+
+```bash
+yarn add openseadragon-filters
+```
+
+## Quick Start
+
+```javascript
+import OpenSeadragon from 'openseadragon';
+import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filters';
+
+const viewer = OpenSeadragon({
+  id: 'viewer',
+  tileSources: 'path/to/image.dzi'
+});
+
+const filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
   filters: {
     processors: BRIGHTNESS(50)
   }
 });
-`````
+```
 
-Decrease the brightness and invert the image:
+## Usage
 
-`````javascript
-import { initializeFiltering, BRIGHTNESS, INVERT } from 'openseadragon-filtering';
+### Single Filter
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
+```javascript
+import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filters';
+
+const filterPlugin = initializeFiltering(viewer);
+filterPlugin.setFilterOptions({
+  filters: {
+    processors: BRIGHTNESS(50)
+  }
+});
+```
+
+### Multiple Filters
+
+Filters are applied in the order specified:
+
+```javascript
+import { initializeFiltering, BRIGHTNESS, INVERT, CONTRAST } from 'openseadragon-filters';
+
 filterPlugin.setFilterOptions({
   filters: {
     processors: [
       BRIGHTNESS(-50),
+      CONTRAST(1.5),
       INVERT()
     ]
   }
 });
-`````
+```
 
-### Specify on which items (TiledImage) to apply the filters
+### Per-Item Filtering
 
-Increase the brightness on item 0 and invert items 1 and 2:
+Apply different filters to specific images:
 
-`````javascript
-import { initializeFiltering, BRIGHTNESS, INVERT } from 'openseadragon-filtering';
+```javascript
+import { initializeFiltering, BRIGHTNESS, INVERT } from 'openseadragon-filters';
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-  filters: [{
-    items: viewer.world.getItemAt(0),
-    processors: [
-      BRIGHTNESS(50)
-    ]
-  }, {
-    items: [viewer.world.getItemAt(1), viewer.world.getItemAt(2)],
-    processors: [
-      INVERT()
-    ]
-  }]
+  filters: [
+    {
+      items: viewer.world.getItemAt(0),
+      processors: [BRIGHTNESS(50)]
+    },
+    {
+      items: [viewer.world.getItemAt(1), viewer.world.getItemAt(2)],
+      processors: [INVERT()]
+    }
+  ]
 });
-`````
+```
 
-Note the items property. If it is not specified, the filter is applied to all
-items.
+> **Note:** If the `items` property is not specified, filters are applied to all items in the viewer.
 
-### Load mode optimization
+### Load Modes
 
-By default, the filters are applied asynchronously. This means that the tiles are
-cleared from the canvas and re-downloaded (note that the browser probably cached
-them though) before having the filter applied. This avoids to hang the browser
-if the filtering operation is slow. It also allows to use asynchronous filters
-like the ones provided by [CamanJS](http://camanjs.com).
+The plugin supports two rendering modes:
 
-However, if you have only fast and synchronous filters, you can force the
-synchronous mode by setting `loadMode: 'sync'`:
+#### Async Mode (Default)
 
-`````javascript
-import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
+Tiles are progressively filtered as they load, preventing browser freezing:
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
+```javascript
+filterPlugin.setFilterOptions({
+  filters: { processors: BRIGHTNESS(50) },
+  loadMode: 'async' // default
+});
+```
+
+#### Sync Mode
+
+Filters are applied immediately for faster rendering with simple filters:
+
+```javascript
+filterPlugin.setFilterOptions({
+  filters: { processors: BRIGHTNESS(50) },
+  loadMode: 'sync'
+});
+```
+
+> **Tip:** Use sync mode for fast, synchronous filters. Use async mode for complex or slow filters to maintain UI responsiveness.
+
+## Built-in Filters
+
+### BRIGHTNESS(adjustment)
+
+Adjusts pixel intensity.
+
+- **Range:** -255 to 255
+- **Effect:** Negative values darken, positive values brighten
+
+```javascript
+BRIGHTNESS(50)  // Increase brightness
+BRIGHTNESS(-50) // Decrease brightness
+```
+
+### CONTRAST(adjustment)
+
+Adjusts image contrast.
+
+- **Range:** 0 to ∞ (typically 0-3)
+- **Effect:** Values < 1 reduce contrast, values > 1 increase contrast
+
+```javascript
+CONTRAST(1.5) // Increase contrast
+CONTRAST(0.5) // Decrease contrast
+```
+
+### GAMMA(adjustment)
+
+Applies gamma correction.
+
+- **Range:** 0 to 5
+- **Effect:** Values < 1 darken, values > 1 brighten
+
+```javascript
+GAMMA(2.2) // Standard gamma correction
+GAMMA(0.5) // Darken image
+```
+
+### THRESHOLDING(threshold)
+
+Converts image to black and white based on threshold.
+
+- **Range:** 0 to 255
+- **Effect:** Pixels ≥ threshold become white, others become black
+
+```javascript
+THRESHOLDING(128) // Standard threshold
+```
+
+### GREYSCALE()
+
+Converts image to greyscale.
+
+```javascript
+GREYSCALE()
+```
+
+### INVERT()
+
+Inverts all colors.
+
+```javascript
+INVERT()
+```
+
+## Custom Filters
+
+Create custom filters by implementing a function that processes canvas context:
+
+```javascript
+function customFilter(context, callback) {
+  const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+  const pixels = imageData.data;
+  
+  // Modify pixels (RGBA format)
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = 255 - pixels[i];     // Red
+    pixels[i + 1] = 255 - pixels[i + 1]; // Green
+    pixels[i + 2] = 255 - pixels[i + 2]; // Blue
+    // pixels[i + 3] is alpha
+  }
+  
+  context.putImageData(imageData, 0, 0);
+  callback();
+}
+
+// Use the custom filter
+filterPlugin.setFilterOptions({
+  filters: {
+    processors: customFilter
+  }
+});
+```
+
+### Custom Filter Requirements
+
+1. Accept a [CanvasRenderingContext2D](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) as the first parameter
+2. Accept a callback function as the second parameter
+3. Call the callback when processing is complete
+4. Use `context.getImageData()` to read pixels
+5. Use `context.putImageData()` to write modified pixels
+
+## API Reference
+
+### initializeFiltering(viewer)
+
+Initializes the filtering plugin for an OpenSeadragon viewer.
+
+**Parameters:**
+- `viewer` (OpenSeadragon.Viewer): The OpenSeadragon viewer instance
+
+**Returns:** FilterPlugin instance
+
+### filterPlugin.setFilterOptions(options)
+
+Configures and applies filters.
+
+**Parameters:**
+- `options.filters` (Object|Array): Filter configuration
+  - `processors` (Function|Array): Single filter or array of filters
+  - `items` (TiledImage|Array): Optional. Specific items to filter
+- `options.loadMode` (String): Optional. 'async' (default) or 'sync'
+
+## TypeScript Support
+
+Full TypeScript definitions are included:
+
+```typescript
+import OpenSeadragon from 'openseadragon';
+import { initializeFiltering, BRIGHTNESS, FilterPlugin } from 'openseadragon-filters';
+
+const viewer: OpenSeadragon.Viewer = OpenSeadragon({ id: 'viewer' });
+const filterPlugin: FilterPlugin = initializeFiltering(viewer);
+
 filterPlugin.setFilterOptions({
   filters: {
     processors: BRIGHTNESS(50)
-  },
-  loadMode: 'sync'
-});
-`````
-
-To visualize the difference between async and sync mode, one can compare how
-the brightness (sync) and contrast (async) filters load in the
-[demo](https://rssaini01.github.io/openseadragon-filters/).
-
-### Provided filters
-
-This plugin includes several built-in filters:
-
-* Thresholding
-
-Set all pixels equals or above the specified threshold to white and the others
-to black. For colored images, the average of the 3 channels is compared to the
-threshold. The specified threshold must be between 0 and 255.
-
-`````javascript
-import { initializeFiltering, THRESHOLDING } from 'openseadragon-filtering';
-
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: THRESHOLDING(threshold)
   }
 });
-`````
+```
 
-* Brightness
+## Known Limitations
 
-Shift the intensity of the pixels by the specified adjustment
-(between -255 and 255).
+### Tile Edge Effects
 
-`````javascript
-import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
+The plugin processes tiles independently and does not handle cross-tile boundaries. Kernel-based filters may produce visible artifacts at tile edges.
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: BRIGHTNESS(adjustment)
-  }
-});
-`````
+## Development
 
-* Contrast
+### Setup
 
-Adjust the contrast of the image. Must be a positive number. Values between 0 and 1
-lessen contrast, values > 1 increase it.
+```bash
+git clone https://github.com/rssaini01/openseadragon-filters.git
+cd openseadragon-filters
+npm install
+```
 
-`````javascript
-import { initializeFiltering, CONTRAST } from 'openseadragon-filtering';
+### Build
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: CONTRAST(adjustment)
-  }
-});
-`````
+```bash
+npm run build        # Build library
+npm run dev          # Start demo dev server
+npm run build:demo   # Build demo site
+```
 
-* Gamma
+### Testing
 
-Apply gamma correction to the image. Range is from 0 to 5. Values between 0 and 1
-darken the image, values > 1 brighten it.
+```bash
+npm test             # Run tests
+npm run test:watch   # Run tests in watch mode
+```
 
-`````javascript
-import { initializeFiltering, GAMMA } from 'openseadragon-filtering';
+### Project Structure
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: GAMMA(adjustment)
-  }
-});
-`````
+```
+openseadragon-filters/
+├── src/                 # Source code
+│   ├── index.ts        # Main entry point
+│   ├── predefined-filters.ts
+│   └── webgl-*.ts      # WebGL implementation
+├── site/               # Demo application
+├── tests/              # Test suite
+└── dist/               # Built output
+    ├── esm/           # ES modules
+    ├── cjs/           # CommonJS
+    └── types/         # TypeScript definitions
+```
 
-* Greyscale
+## Contributing
 
-Convert the image to greyscale by averaging the RGB channels.
+Contributions are welcome! Please:
 
-`````javascript
-import { initializeFiltering, GREYSCALE } from 'openseadragon-filtering';
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: GREYSCALE()
-  }
-});
-`````
+Please ensure:
+- Tests pass (`npm test`)
+- Code follows existing style
+- TypeScript types are updated
 
-* Invert
+## License
 
-Invert the colors of the image.
+MIT © [Ravi Shankar Saini](https://github.com/rssaini01)
 
-`````javascript
-import { initializeFiltering, INVERT } from 'openseadragon-filtering';
+See [LICENSE](./LICENSE) for details.
 
-var viewer = new OpenSeadragon({});
-var filterPlugin = initializeFiltering(viewer);
-filterPlugin.setFilterOptions({
-  filters: {
-    processors: INVERT()
-  }
-});
-`````
+## Acknowledgments
 
-### Implementing customs filters
+- Built for [OpenSeadragon](http://openseadragon.github.io/)
+- Inspired by image processing needs in digital libraries and archives
 
-To implement a custom filter, one need to create a function taking a
-[2D context](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
-and a callback as parameters. When that function is called by the plugin,
-the context will be a tile's canvas context. One should use
-[context.getImageData](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData)
-to retrieve the pixels values and
-[context.putImageData](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/putImageData)
-to save the modified pixels.
-The callback method must be called when the filtering is done. The provided
-filters are good examples for such implementations.
+## Links
 
-### Edge effects
-
-This plugin is working on tiles and does not currently handle tiles edges.
-This means that if you are using kernel based filters, you should expect
-edge effects around tiles.
-
-### Build the demo
-
-To build the demo run `npm install` and then `npm run dev`.
-The result of the build will be in the `dist` folder.
+- [Demo](https://rssaini01.github.io/openseadragon-filters/)
+- [NPM Package](https://www.npmjs.com/package/openseadragon-filters)
+- [GitHub Repository](https://github.com/rssaini01/openseadragon-filters)
+- [Issue Tracker](https://github.com/rssaini01/openseadragon-filters/issues)
+- [OpenSeadragon](http://openseadragon.github.io/)
