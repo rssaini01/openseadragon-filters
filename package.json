@@ -15,7 +15,7 @@
   },
   "workspaces": [
     "site",
-    "tests-workspace"
+    "tests"
   ],
   "engines": {
     "node": ">=20.0"
@@ -34,8 +34,8 @@
     "deploy:demo": "npm run build && npm run build:demo && git subtree push --prefix site/dist origin gh-pages",
     "preview": "npm run preview --workspace=site",
     "watch": "tsc --watch",
-    "test": "npm run test --workspace=tests-workspace",
-    "test:watch": "npm run test:watch --workspace=tests-workspace",
+    "test": "npm run test --workspace=tests",
+    "test:watch": "npm run test:watch --workspace=tests",
     "prepare": "npm run build"
   },
   "repository": {
