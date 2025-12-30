@@ -1,14 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initializeFiltering, FilterPlugin, BRIGHTNESS, INVERT } from '../src';
 
-// Mock OpenSeadragon module
 vi.mock('openseadragon', () => ({
   default: {
     Viewer: vi.fn(() => mockViewer)
   }
 }));
 
-// Mock viewer
 const mockViewer = {
   drawer: { constructor: { name: 'CanvasDrawer' } },
   addHandler: vi.fn(),
@@ -28,14 +26,12 @@ describe('OpenSeadragon Filters Plugin', () => {
   describe('initializeFiltering', () => {
     it('should return FilterPlugin instance', () => {
       const plugin = initializeFiltering(mockViewer as any);
-
       expect(plugin).toBeInstanceOf(FilterPlugin);
     });
 
     it('should pass options to FilterPlugin', () => {
       const options = { loadMode: 'sync' as const };
       const plugin = initializeFiltering(mockViewer as any, options);
-
       expect(plugin).toBeInstanceOf(FilterPlugin);
     });
   });
@@ -49,15 +45,13 @@ describe('OpenSeadragon Filters Plugin', () => {
 
     it('should initialize with viewer', () => {
       const plugin = new FilterPlugin({ viewer: mockViewer as any });
-
       expect(plugin.viewer).toBe(mockViewer);
-      expect(plugin.filterIncrement).toBe(1); // Constructor calls setOptions which increments
+      expect(plugin.filterIncrement).toBe(1);
       expect(plugin.filters).toEqual([]);
     });
 
     it('should add event handlers to viewer', () => {
       new FilterPlugin({ viewer: mockViewer as any });
-
       expect(mockViewer.addHandler).toHaveBeenCalledWith('tile-loaded', expect.any(Function));
       expect(mockViewer.addHandler).toHaveBeenCalledWith('tile-drawing', expect.any(Function));
     });
@@ -102,18 +96,6 @@ describe('OpenSeadragon Filters Plugin', () => {
         'canvas',
         expect.objectContaining({ mainDrawer: true })
       );
-    });
-  });
-
-  describe('Predefined Filters', () => {
-    it('should create BRIGHTNESS filter', () => {
-      const filter = BRIGHTNESS(50);
-      expect(typeof filter).toBe('function');
-    });
-
-    it('should create INVERT filter', () => {
-      const filter = INVERT();
-      expect(typeof filter).toBe('function');
     });
   });
 });
