@@ -1,63 +1,75 @@
-This [OpenSeadragon](http://openseadragon.github.io/) plugin provides
-the capability to add filters to the images.
+# OpenSeadragon Filters
 
-A demo is available [here](https://rssaini01.github.io/openseadragon-filters/) and here is the [NPM Package](https://www.npmjs.com/package/openseadragon-filters).
+[![codecov](https://codecov.io/github/rssaini01/openseadragon-filters/graph/badge.svg?token=MU0kWouujb)](https://codecov.io/github/rssaini01/openseadragon-filters)
+[![npm version](https://img.shields.io/npm/v/openseadragon-filters.svg)](https://www.npmjs.com/package/openseadragon-filters)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/rssaini01/openseadragon-filters/deploy-demo-site.yml?branch=main)](https://github.com/rssaini01/openseadragon-filters/actions)
+[![Downloads](https://img.shields.io/npm/dm/openseadragon-filters.svg)](https://www.npmjs.com/package/openseadragon-filters)
+
+This [OpenSeadragon](http://openseadragon.github.io/) plugin provides the capability to add filters to the images.
+
+A demo is available [here](https://rssaini01.github.io/openseadragon-filters/) and here is
+the [NPM Package](https://www.npmjs.com/package/openseadragon-filters).
 
 This plugin requires OpenSeadragon 5.0+.
 
 ### Basic usage
 
 Increase the brightness:
+
 `````javascript
 import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
 
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: BRIGHTNESS(50)
-    }
+  filters: {
+    processors: BRIGHTNESS(50)
+  }
 });
 `````
 
 Decrease the brightness and invert the image:
+
 `````javascript
 import { initializeFiltering, BRIGHTNESS, INVERT } from 'openseadragon-filtering';
 
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: [
-            BRIGHTNESS(-50),
-            INVERT()
-        ]
-    }
+  filters: {
+    processors: [
+      BRIGHTNESS(-50),
+      INVERT()
+    ]
+  }
 });
 `````
 
 ### Specify on which items (TiledImage) to apply the filters
 
 Increase the brightness on item 0 and invert items 1 and 2:
+
 `````javascript
 import { initializeFiltering, BRIGHTNESS, INVERT } from 'openseadragon-filtering';
 
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: [{
-        items: viewer.world.getItemAt(0),
-        processors: [
-            BRIGHTNESS(50)
-        ]
-    }, {
-        items: [viewer.world.getItemAt(1), viewer.world.getItemAt(2)],
-        processors: [
-            INVERT()
-        ]
-    }]
+  filters: [{
+    items: viewer.world.getItemAt(0),
+    processors: [
+      BRIGHTNESS(50)
+    ]
+  }, {
+    items: [viewer.world.getItemAt(1), viewer.world.getItemAt(2)],
+    processors: [
+      INVERT()
+    ]
+  }]
 });
 `````
+
 Note the items property. If it is not specified, the filter is applied to all
 items.
 
@@ -78,10 +90,10 @@ import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: BRIGHTNESS(50)
-    },
-    loadMode: 'sync'
+  filters: {
+    processors: BRIGHTNESS(50)
+  },
+  loadMode: 'sync'
 });
 `````
 
@@ -105,9 +117,9 @@ import { initializeFiltering, THRESHOLDING } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: THRESHOLDING(threshold)
-    }
+  filters: {
+    processors: THRESHOLDING(threshold)
+  }
 });
 `````
 
@@ -122,9 +134,9 @@ import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: BRIGHTNESS(adjustment)
-    }
+  filters: {
+    processors: BRIGHTNESS(adjustment)
+  }
 });
 `````
 
@@ -139,9 +151,9 @@ import { initializeFiltering, CONTRAST } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: CONTRAST(adjustment)
-    }
+  filters: {
+    processors: CONTRAST(adjustment)
+  }
 });
 `````
 
@@ -156,9 +168,9 @@ import { initializeFiltering, GAMMA } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: GAMMA(adjustment)
-    }
+  filters: {
+    processors: GAMMA(adjustment)
+  }
 });
 `````
 
@@ -172,9 +184,9 @@ import { initializeFiltering, GREYSCALE } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: GREYSCALE()
-    }
+  filters: {
+    processors: GREYSCALE()
+  }
 });
 `````
 
@@ -188,9 +200,9 @@ import { initializeFiltering, INVERT } from 'openseadragon-filtering';
 var viewer = new OpenSeadragon({});
 var filterPlugin = initializeFiltering(viewer);
 filterPlugin.setFilterOptions({
-    filters: {
-        processors: INVERT()
-    }
+  filters: {
+    processors: INVERT()
+  }
 });
 `````
 
