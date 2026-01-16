@@ -2,9 +2,16 @@ import * as Shaders from './webgl-shaders';
 import OpenSeadragon from 'openseadragon';
 import { configureTexture } from './webgl-utils';
 
-interface WebGLFilterConfig {
+export interface WebGLFilterConfig {
+    name?: string;
     shader: string;
     uniforms: Record<string, any>;
+}
+
+export interface WebGLFiltering {
+    setFilters: (newFilters: WebGLFilterConfig[]) => void;
+    clearFilters: () => void;
+    destroy: () => void;
 }
 
 type ExtendedViewer = OpenSeadragon.Viewer & { canvas: HTMLCanvasElement }
@@ -58,6 +65,9 @@ class WebGLFilterRenderer {
     }
 
     private compileShader(source: string, type: number): WebGLShader {
+        if (!source) {
+            throw new Error(`Shader source is ${source}. Type: ${type === this.gl.VERTEX_SHADER ? 'VERTEX' : 'FRAGMENT'}`);
+        }
         const gl = this.gl;
         const shader = gl.createShader(type)!;
         gl.shaderSource(shader, source);
@@ -69,6 +79,9 @@ class WebGLFilterRenderer {
     }
 
     private createProgram(fragmentShader: string): WebGLProgram {
+        if (!fragmentShader) {
+            throw new Error('Fragment shader source is undefined');
+        }
         const gl = this.gl;
         const vs = this.compileShader(Shaders.vertexShader, gl.VERTEX_SHADER);
         const fs = this.compileShader(fragmentShader, gl.FRAGMENT_SHADER);
@@ -172,6 +185,9 @@ class WebGLFilterRenderer {
 
         for (let i = 0; i < filters.length; i++) {
             const filter = filters[i];
+            if (!filter.shader) {
+                throw new Error(`Filter at index ${i} is missing shader property`);
+            }
             const program = this.getProgram(`filter_${i}_${Date.now()}`, filter.shader);
             gl.useProgram(program);
 
@@ -218,7 +234,7 @@ class WebGLFilterRenderer {
     }
 }
 
-export const initWebGLFiltering = (viewer: OpenSeadragon.Viewer) => {
+export const initWebGLFiltering = (viewer: OpenSeadragon.Viewer): WebGLFiltering => {
     const renderer = new WebGLFilterRenderer(viewer as ExtendedViewer);
     let filters: WebGLFilterConfig[] = [];
 
@@ -247,6 +263,7 @@ export const initWebGLFiltering = (viewer: OpenSeadragon.Viewer) => {
 };
 
 export const convertToWebGLFilter = (name: string, shader: string, uniforms: Record<string, any>): WebGLFilterConfig => ({
+    name,
     shader,
     uniforms
 });

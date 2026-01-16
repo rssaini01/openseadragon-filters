@@ -15,8 +15,8 @@ A high-performance [OpenSeadragon](http://openseadragon.github.io/) plugin that 
 - ⚡ **WebGL-accelerated** filtering for optimal performance
 - 🎯 **Multiple built-in filters**: brightness, contrast, gamma, threshold, invert, greyscale
 - 🔧 **Customizable**: create your own filters
-- 🎭 **Per-item filtering**: apply different filters to different images
-- 🔄 **Sync/Async modes**: choose between immediate or progressive rendering
+- 🎭 **Per-item filtering**: apply different filters to different images (canvas mode)
+- 🔄 **Two rendering modes**: tile-based (canvas) or viewport-based (WebGL overlay)
 - 📦 **TypeScript support**: full type definitions included
 - 🌐 **Modern ESM/CJS**: supports both module formats
 
@@ -39,6 +39,8 @@ yarn add openseadragon-filters
 
 ## Quick Start
 
+### Canvas-Based Filtering (Tile-by-Tile)
+
 ```javascript
 import OpenSeadragon from 'openseadragon';
 import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filters';
@@ -56,9 +58,30 @@ filterPlugin.setFilterOptions({
 });
 ```
 
+### WebGL-Based Filtering (Viewport Overlay)
+
+```javascript
+import OpenSeadragon from 'openseadragon';
+import { initWebGLFiltering, BRIGHTNESS_WEBGL } from 'openseadragon-filters';
+
+const viewer = OpenSeadragon({
+  id: 'viewer',
+  tileSources: 'path/to/image.dzi'
+});
+
+const filterPlugin = initWebGLFiltering(viewer);
+filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
+```
+
 ## Usage
 
-### Single Filter
+This plugin provides two filtering approaches:
+
+### 1. Canvas-Based Filtering (Tile-by-Tile)
+
+Filters each tile individually as it loads. Best for per-tile effects and compatibility.
+
+#### Single Filter
 
 ```javascript
 import { initializeFiltering, BRIGHTNESS } from 'openseadragon-filters';
@@ -71,7 +94,7 @@ filterPlugin.setFilterOptions({
 });
 ```
 
-### Multiple Filters
+#### Multiple Filters
 
 Filters are applied in the order specified:
 
@@ -89,7 +112,7 @@ filterPlugin.setFilterOptions({
 });
 ```
 
-### Per-Item Filtering
+#### Per-Item Filtering
 
 Apply different filters to specific images:
 
@@ -112,11 +135,11 @@ filterPlugin.setFilterOptions({
 
 > **Note:** If the `items` property is not specified, filters are applied to all items in the viewer.
 
-### Load Modes
+#### Load Modes
 
-The plugin supports two rendering modes:
+The canvas-based plugin supports two rendering modes:
 
-#### Async Mode (Default)
+##### Async Mode (Default)
 
 Tiles are progressively filtered as they load, preventing browser freezing:
 
@@ -127,7 +150,7 @@ filterPlugin.setFilterOptions({
 });
 ```
 
-#### Sync Mode
+##### Sync Mode
 
 Filters are applied immediately for faster rendering with simple filters:
 
@@ -140,9 +163,68 @@ filterPlugin.setFilterOptions({
 
 > **Tip:** Use sync mode for fast, synchronous filters. Use async mode for complex or slow filters to maintain UI responsiveness.
 
+### 2. WebGL-Based Filtering (Viewport Overlay)
+
+Applies filters to the entire viewport using WebGL. Best for real-time performance and viewport-level effects.
+
+#### Basic Usage
+
+```javascript
+import { initWebGLFiltering, BRIGHTNESS_WEBGL, CONTRAST_WEBGL } from 'openseadragon-filters';
+
+const filterPlugin = initWebGLFiltering(viewer);
+
+// Single filter
+filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
+
+// Multiple filters
+filterPlugin.setFilters([
+  BRIGHTNESS_WEBGL(50),
+  CONTRAST_WEBGL(1.5)
+]);
+
+// Clear filters
+filterPlugin.clearFilters();
+```
+
+#### Custom WebGL Filters
+
+```javascript
+import { convertToWebGLFilter } from 'openseadragon-filters';
+
+const customShader = `
+precision mediump float;
+uniform sampler2D u_image;
+uniform float u_intensity;
+varying vec2 v_texCoord;
+void main() {
+  vec4 color = texture2D(u_image, v_texCoord);
+  gl_FragColor = vec4(color.rgb * u_intensity, color.a);
+}
+`;
+
+const customFilter = convertToWebGLFilter('custom', customShader, { u_intensity: 1.5 });
+filterPlugin.setFilters([customFilter]);
+```
+
+#### Choosing Between Canvas and WebGL
+
+| Feature | Canvas-Based | WebGL-Based |
+|---------|-------------|-------------|
+| Performance | Good for simple filters | Excellent for all filters |
+| Per-tile filtering | ✅ Yes | ❌ No (viewport only) |
+| Per-item filtering | ✅ Yes | ❌ No |
+| Custom filters | Canvas API | GLSL shaders |
+| Browser support | Universal | Requires WebGL |
+| Best for | Tile-specific effects, compatibility | Real-time performance, viewport effects |
+
 ## Built-in Filters
 
-### BRIGHTNESS(adjustment)
+### Canvas Filters
+
+Use with `initializeFiltering()`:
+
+#### BRIGHTNESS(adjustment)
 
 Adjusts pixel intensity.
 
@@ -154,7 +236,7 @@ BRIGHTNESS(50)  // Increase brightness
 BRIGHTNESS(-50) // Decrease brightness
 ```
 
-### CONTRAST(adjustment)
+#### CONTRAST(adjustment)
 
 Adjusts image contrast.
 
@@ -166,7 +248,7 @@ CONTRAST(1.5) // Increase contrast
 CONTRAST(0.5) // Decrease contrast
 ```
 
-### GAMMA(adjustment)
+#### GAMMA(adjustment)
 
 Applies gamma correction.
 
@@ -178,7 +260,7 @@ GAMMA(2.2) // Standard gamma correction
 GAMMA(0.5) // Darken image
 ```
 
-### THRESHOLDING(threshold)
+#### THRESHOLDING(threshold)
 
 Converts image to black and white based on threshold.
 
@@ -189,7 +271,7 @@ Converts image to black and white based on threshold.
 THRESHOLDING(128) // Standard threshold
 ```
 
-### GREYSCALE()
+#### GREYSCALE()
 
 Converts image to greyscale.
 
@@ -197,7 +279,7 @@ Converts image to greyscale.
 GREYSCALE()
 ```
 
-### INVERT()
+#### INVERT()
 
 Inverts all colors.
 
@@ -205,7 +287,31 @@ Inverts all colors.
 INVERT()
 ```
 
+### WebGL Filters
+
+Use with `initWebGLFiltering()`. Same parameters as canvas filters but with `_WEBGL` suffix:
+
+```javascript
+import { 
+  BRIGHTNESS_WEBGL, 
+  CONTRAST_WEBGL, 
+  GAMMA_WEBGL,
+  THRESHOLDING_WEBGL,
+  GREYSCALE_WEBGL,
+  INVERT_WEBGL
+} from 'openseadragon-filters';
+
+// Usage
+filterPlugin.setFilters([
+  BRIGHTNESS_WEBGL(50),
+  CONTRAST_WEBGL(1.5),
+  GAMMA_WEBGL(2.2)
+]);
+```
+
 ## Custom Filters
+
+### Canvas Custom Filters
 
 Create custom filters by implementing a function that processes canvas context:
 
@@ -234,7 +340,7 @@ filterPlugin.setFilterOptions({
 });
 ```
 
-### Custom Filter Requirements
+#### Custom Filter Requirements
 
 1. Accept a [CanvasRenderingContext2D](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) as the first parameter
 2. Accept a callback function as the second parameter
@@ -244,7 +350,9 @@ filterPlugin.setFilterOptions({
 
 ## API Reference
 
-### initializeFiltering(viewer)
+### Canvas-Based API
+
+#### initializeFiltering(viewer)
 
 Initializes the filtering plugin for an OpenSeadragon viewer.
 
@@ -253,7 +361,7 @@ Initializes the filtering plugin for an OpenSeadragon viewer.
 
 **Returns:** FilterPlugin instance
 
-### filterPlugin.setFilterOptions(options)
+#### filterPlugin.setFilterOptions(options)
 
 Configures and applies filters.
 
@@ -262,6 +370,46 @@ Configures and applies filters.
   - `processors` (Function|Array): Single filter or array of filters
   - `items` (TiledImage|Array): Optional. Specific items to filter
 - `options.loadMode` (String): Optional. 'async' (default) or 'sync'
+
+### WebGL-Based API
+
+#### initWebGLFiltering(viewer)
+
+Initializes WebGL viewport filtering for an OpenSeadragon viewer.
+
+**Parameters:**
+- `viewer` (OpenSeadragon.Viewer): The OpenSeadragon viewer instance
+
+**Returns:** Object with methods:
+- `setFilters(filters)`: Apply WebGL filters
+- `clearFilters()`: Remove all filters
+- `destroy()`: Clean up resources
+
+#### filterPlugin.setFilters(filters)
+
+Applies WebGL filters to the viewport.
+
+**Parameters:**
+- `filters` (Array): Array of WebGLFilterConfig objects
+
+**Example:**
+```javascript
+filterPlugin.setFilters([
+  BRIGHTNESS_WEBGL(50),
+  CONTRAST_WEBGL(1.5)
+]);
+```
+
+#### convertToWebGLFilter(name, shader, uniforms)
+
+Creates a custom WebGL filter configuration.
+
+**Parameters:**
+- `name` (String): Filter identifier
+- `shader` (String): GLSL fragment shader source
+- `uniforms` (Object): Shader uniform values
+
+**Returns:** WebGLFilterConfig object
 
 ## TypeScript Support
 
@@ -285,7 +433,7 @@ filterPlugin.setFilterOptions({
 
 ### Tile Edge Effects
 
-The plugin processes tiles independently and does not handle cross-tile boundaries. Kernel-based filters may produce visible artifacts at tile edges.
+The canvas-based plugin processes tiles independently and does not handle cross-tile boundaries. Kernel-based filters may produce visible artifacts at tile edges.
 
 ## Development
 

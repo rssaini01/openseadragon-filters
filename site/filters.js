@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Slider from './components/Slider';
-import * as Filters from '../src/openseadragon-filter';
+import * as Filters from '../src/index';
 import { USE_WEBGL_DRAWER } from "./App.jsx";
 
 export const availableFilters = [

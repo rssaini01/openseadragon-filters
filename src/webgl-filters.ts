@@ -1,84 +1,68 @@
-import type { FilterProcessor } from './openseadragon-filter';
-import { createWebGLFilter } from './webgl-processor';
 import * as Shaders from './webgl-shaders';
+import { convertToWebGLFilter, WebGLFilterConfig } from './webgl-overlay-filter';
 
-export const BRIGHTNESS_WEBGL = (adjustment: number): FilterProcessor => {
+export const BRIGHTNESS_WEBGL = (adjustment: number): WebGLFilterConfig => {
     if (adjustment < -255 || adjustment > 255) {
         throw new Error('Brightness adjustment must be between -255 and 255.');
     }
-    return createWebGLFilter('brightness', Shaders.brightnessShader, { u_adjustment: adjustment });
+    return convertToWebGLFilter('brightness', Shaders.brightnessShader, { u_adjustment: adjustment });
 };
 
-export const CONTRAST_WEBGL = (adjustment: number): FilterProcessor => {
+export const CONTRAST_WEBGL = (adjustment: number): WebGLFilterConfig => {
     if (adjustment < 0) {
         throw new Error('Contrast adjustment must be positive.');
     }
-    return createWebGLFilter('contrast', Shaders.contrastShader, { u_adjustment: adjustment });
+    return convertToWebGLFilter('contrast', Shaders.contrastShader, { u_adjustment: adjustment });
 };
 
-export const GAMMA_WEBGL = (adjustment: number): FilterProcessor => {
+export const GAMMA_WEBGL = (adjustment: number): WebGLFilterConfig => {
     if (adjustment < 0) {
         throw new Error('Gamma adjustment must be positive.');
     }
-    return createWebGLFilter('gamma', Shaders.gammaShader, { u_adjustment: adjustment });
+    return convertToWebGLFilter('gamma', Shaders.gammaShader, { u_adjustment: adjustment });
 };
 
-export const INVERT_WEBGL = (): FilterProcessor => {
-    return createWebGLFilter('invert', Shaders.invertShader, {});
+export const INVERT_WEBGL = (): WebGLFilterConfig => {
+    return convertToWebGLFilter('invert', Shaders.invertShader, {});
 };
 
-export const GREYSCALE_WEBGL = (): FilterProcessor => {
-    return createWebGLFilter('greyscale', Shaders.greyscaleShader, {});
+export const GREYSCALE_WEBGL = (): WebGLFilterConfig => {
+    return convertToWebGLFilter('greyscale', Shaders.greyscaleShader, {});
 };
 
-export const THRESHOLDING_WEBGL = (threshold: number): FilterProcessor => {
+export const THRESHOLDING_WEBGL = (threshold: number): WebGLFilterConfig => {
     if (threshold < 0 || threshold > 255) {
         throw new Error('Threshold must be between 0 and 255.');
     }
-    return createWebGLFilter('threshold', Shaders.thresholdShader, { u_threshold: threshold });
+    return convertToWebGLFilter('threshold', Shaders.thresholdShader, { u_threshold: threshold });
 };
 
-export const CONVOLUTION_WEBGL = (kernel: number[]): FilterProcessor => {
+export const CONVOLUTION_WEBGL = (kernel: number[]): WebGLFilterConfig => {
     if (kernel.length !== 9) {
         throw new Error('Kernel must be 3x3 (9 elements).');
     }
-    return (context: CanvasRenderingContext2D, callback?: () => void) => {
-        createWebGLFilter('convolution', Shaders.convolutionShader, {
-            u_kernel: kernel,
-            u_textureSize: [context.canvas.width, context.canvas.height]
-        })(context, callback);
-    };
+    return convertToWebGLFilter('convolution', Shaders.convolutionShader, { u_kernel: kernel });
 };
 
-export const COLORMAP_WEBGL = (stops: number[][], centerpoint: number = 128): FilterProcessor => {
+export const COLORMAP_WEBGL = (stops: number[][], centerpoint: number = 128): WebGLFilterConfig => {
     const flatStops = stops.flat();
-    return createWebGLFilter('colormap', Shaders.colormapShader, {
+    return convertToWebGLFilter('colormap', Shaders.colormapShader, {
         u_colorStops: flatStops.map(v => v / 255),
         u_numStops: stops.length,
         u_centerpoint: centerpoint
     });
 };
 
-export const DILATION_WEBGL = (kernelSize: number): FilterProcessor => {
+export const DILATION_WEBGL = (kernelSize: number): WebGLFilterConfig => {
     if (kernelSize % 2 === 0 || kernelSize < 3) {
         throw new Error('Kernel size must be an odd number >= 3.');
     }
-    return (context: CanvasRenderingContext2D, callback?: () => void) => {
-        createWebGLFilter('dilation', Shaders.dilationShader, {
-            u_kernelSize: kernelSize,
-            u_textureSize: [context.canvas.width, context.canvas.height]
-        })(context, callback);
-    };
+    return convertToWebGLFilter('dilation', Shaders.dilationShader, { u_kernelSize: kernelSize });
 };
 
-export const EROSION_WEBGL = (kernelSize: number): FilterProcessor => {
+export const EROSION_WEBGL = (kernelSize: number): WebGLFilterConfig => {
     if (kernelSize % 2 === 0 || kernelSize < 3) {
         throw new Error('Kernel size must be an odd number >= 3.');
     }
-    return (context: CanvasRenderingContext2D, callback?: () => void) => {
-        createWebGLFilter('erosion', Shaders.erosionShader, {
-            u_kernelSize: kernelSize,
-            u_textureSize: [context.canvas.width, context.canvas.height]
-        })(context, callback);
-    };
+    return convertToWebGLFilter('erosion', Shaders.erosionShader, { u_kernelSize: kernelSize });
 };
