@@ -69,8 +69,11 @@ const viewer = OpenSeadragon({
   tileSources: 'path/to/image.dzi'
 });
 
-const filterPlugin = initWebGLFiltering(viewer);
-filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
+// Initialize after viewer is ready
+viewer.addOnceHandler('open', () => {
+  const filterPlugin = initWebGLFiltering(viewer);
+  filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
+});
 ```
 
 ## Usage
@@ -167,24 +170,28 @@ filterPlugin.setFilterOptions({
 
 Applies filters to the entire viewport using WebGL. Best for real-time performance and viewport-level effects.
 
+> **Important:** Initialize WebGL filtering after the viewer is ready using the `open` event.
+
 #### Basic Usage
 
 ```javascript
 import { initWebGLFiltering, BRIGHTNESS_WEBGL, CONTRAST_WEBGL } from 'openseadragon-filters';
 
-const filterPlugin = initWebGLFiltering(viewer);
+viewer.addOnceHandler('open', () => {
+  const filterPlugin = initWebGLFiltering(viewer);
 
-// Single filter
-filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
+  // Single filter
+  filterPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
 
-// Multiple filters
-filterPlugin.setFilters([
-  BRIGHTNESS_WEBGL(50),
-  CONTRAST_WEBGL(1.5)
-]);
+  // Multiple filters
+  filterPlugin.setFilters([
+    BRIGHTNESS_WEBGL(50),
+    CONTRAST_WEBGL(1.5)
+  ]);
 
-// Clear filters
-filterPlugin.clearFilters();
+  // Clear filters
+  filterPlugin.clearFilters();
+});
 ```
 
 #### Custom WebGL Filters
@@ -203,8 +210,11 @@ void main() {
 }
 `;
 
-const customFilter = convertToWebGLFilter('custom', customShader, { u_intensity: 1.5 });
-filterPlugin.setFilters([customFilter]);
+viewer.addOnceHandler('open', () => {
+  const filterPlugin = initWebGLFiltering(viewer);
+  const customFilter = convertToWebGLFilter('custom', customShader, { u_intensity: 1.5 });
+  filterPlugin.setFilters([customFilter]);
+});
 ```
 
 #### Choosing Between Canvas and WebGL
@@ -417,15 +427,27 @@ Full TypeScript definitions are included:
 
 ```typescript
 import OpenSeadragon from 'openseadragon';
-import { initializeFiltering, BRIGHTNESS, FilterPlugin } from 'openseadragon-filters';
+import { 
+  initializeFiltering, 
+  initWebGLFiltering,
+  BRIGHTNESS, 
+  BRIGHTNESS_WEBGL,
+  FilterPlugin 
+} from 'openseadragon-filters';
 
+// Canvas-based
 const viewer: OpenSeadragon.Viewer = OpenSeadragon({ id: 'viewer' });
 const filterPlugin: FilterPlugin = initializeFiltering(viewer);
-
 filterPlugin.setFilterOptions({
   filters: {
     processors: BRIGHTNESS(50)
   }
+});
+
+// WebGL-based
+viewer.addOnceHandler('open', () => {
+  const webglPlugin = initWebGLFiltering(viewer);
+  webglPlugin.setFilters([BRIGHTNESS_WEBGL(50)]);
 });
 ```
 
