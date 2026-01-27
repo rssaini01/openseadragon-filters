@@ -522,7 +522,7 @@ See [LICENSE](./LICENSE) for details.
 ## Acknowledgments
 
 - Built for [OpenSeadragon](http://openseadragon.github.io/)
-- Inspired by image processing needs in digital libraries and archives
+- Inspired by [NIST's OpenSeadragonFiltering](https://github.com/usnistgov/OpenSeadragonFiltering) - completely rewritten with WebGL support and modern architecture. The original implementation was canvas-only and is no longer maintained
 
 ## Links
 
